@@ -1,0 +1,45 @@
+{
+  "name": "Chore",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Name of the chore"
+    },
+    "description": {
+      "type": "string",
+      "description": "Details about the chore"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "ID of the person assigned to this chore"
+    },
+    "frequency": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly"
+      ],
+      "default": "weekly",
+      "description": "How often this chore needs to be done"
+    },
+    "icon": {
+      "type": "string",
+      "default": "sparkles",
+      "description": "Icon key for the chore"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "payout_per_completion": {
+      "type": "number",
+      "default": 0,
+      "description": "Amount paid each time this chore is completed (0 = not a paid chore)"
+    }
+  },
+  "required": [
+    "title",
+    "assigned_to"
+  ]
+}

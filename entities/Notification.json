@@ -1,0 +1,43 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "chore_completed",
+        "payout_approved",
+        "payout_requested",
+        "streak_broken",
+        "streak_milestone",
+        "achievement_unlocked"
+      ],
+      "description": "Type of notification"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short title"
+    },
+    "message": {
+      "type": "string",
+      "description": "Full notification message"
+    },
+    "person_id": {
+      "type": "string",
+      "description": "Person this notification relates to"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false
+    },
+    "icon": {
+      "type": "string",
+      "description": "Emoji icon"
+    }
+  },
+  "required": [
+    "type",
+    "title",
+    "message"
+  ]
+}

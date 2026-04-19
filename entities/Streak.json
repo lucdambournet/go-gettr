@@ -1,0 +1,33 @@
+{
+  "name": "Streak",
+  "type": "object",
+  "properties": {
+    "person_id": {
+      "type": "string",
+      "description": "ID of the person"
+    },
+    "current_streak": {
+      "type": "number",
+      "default": 0,
+      "description": "Current consecutive day streak"
+    },
+    "longest_streak": {
+      "type": "number",
+      "default": 0,
+      "description": "Longest streak ever achieved"
+    },
+    "last_checkin_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of last check-in (YYYY-MM-DD)"
+    },
+    "total_rewards_earned": {
+      "type": "number",
+      "default": 0,
+      "description": "Total reward money earned from streaks"
+    }
+  },
+  "required": [
+    "person_id"
+  ]
+}
