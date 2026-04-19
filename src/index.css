@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Nunito:wght@700;800;900&family=Syne:wght@700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-inter: 'Inter', sans-serif;
+    --font-syne: 'Syne', sans-serif;
+    --font-nunito: 'Nunito', sans-serif;
+    --background: 225 20% 97%;
+    --foreground: 230 25% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 230 25% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 230 25% 10%;
+    --primary: 245 58% 51%;
+    --primary-foreground: 0 0% 100%;
+    /* secondary is always a subtle tint of the background — safe for hover */
+    --secondary: 225 20% 91%;
+    --secondary-foreground: 230 25% 12%;
+    --muted: 225 15% 94%;
+    --muted-foreground: 225 10% 42%;
+    --accent: 33 90% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 225 15% 88%;
+    --input: 225 15% 88%;
+    --ring: 245 58% 51%;
+    --chart-1: 245 58% 51%;
+    --chart-2: 160 55% 40%;
+    --chart-3: 33 90% 50%;
+    --chart-4: 340 65% 52%;
+    --chart-5: 200 70% 48%;
+    --radius: 0.75rem;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 230 25% 10%;
+    --sidebar-primary: 245 58% 51%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 225 20% 93%;
+    --sidebar-accent-foreground: 230 25% 10%;
+    --sidebar-border: 225 15% 90%;
+    --sidebar-ring: 245 58% 51%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-inter;
+  }
+}
