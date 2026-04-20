@@ -23,8 +23,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Editor
-.vscode/*
+# Editor 
 !.vscode/extensions.json
 .idea/
 *.suo
