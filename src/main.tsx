@@ -8,7 +8,7 @@ import { applyStoredTheme } from '@/lib/applyStoredTheme'
 // Apply saved theme immediately before first render so it's consistent on every page
 applyStoredTheme()
 
-const sentryDsn = import.meta.env.VITE_SENTRY_DSN as string | undefined
+const sentryDsn = import.meta.env.VITE_SENTRY_DSN
 
 if (sentryDsn) {
   Sentry.init({
@@ -17,6 +17,6 @@ if (sentryDsn) {
   })
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <App />
 )
