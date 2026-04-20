@@ -1,12 +1,21 @@
-export interface Person {
+export interface Profile {
   id: string;
+  auth_user_id?: string | null;
+  first_name: string;
+  last_name: string;
+  /** Computed by the API layer: first_name + ' ' + last_name */
   name: string;
+  email: string;
+  role: 'parent' | 'child';
+  /** Computed by the API layer: role === 'parent' */
+  is_parent: boolean;
+  family_id: string | null;
   active?: boolean;
-  is_parent?: boolean;
   avatar_color?: string;
   weekly_allowance?: number;
   notify_on_payout_request?: boolean;
   max_single_payout?: number | null;
+  created_at?: string;
 }
 
 export interface Chore {
@@ -23,7 +32,7 @@ export interface Chore {
 export interface ChoreLog {
   id: string;
   chore_id: string;
-  person_id: string;
+  profile_id: string;
   week_start: string;
   day: string;
   completed: boolean;
@@ -31,7 +40,7 @@ export interface ChoreLog {
 
 export interface Streak {
   id: string;
-  person_id: string;
+  profile_id: string;
   current_streak: number;
   longest_streak: number;
   last_checkin_date: string | null;
@@ -40,16 +49,16 @@ export interface Streak {
 
 export interface Payout {
   id: string;
-  person_id: string;
+  profile_id: string;
   amount: number;
-  status: "pending" | "paid";
+  status: 'pending' | 'paid';
   requested_date: string;
   paid_date?: string;
 }
 
 export interface Notification {
   id: string;
-  person_id?: string;
+  profile_id?: string;
   type: string;
   title: string;
   message: string;
@@ -60,7 +69,7 @@ export interface Notification {
 
 export interface Achievement {
   id: string;
-  person_id: string;
+  profile_id: string;
   type: string;
   title: string;
   description: string;
@@ -73,4 +82,23 @@ export interface PublicSettings {
   theme?: string;
   app_name?: string;
   app_icon?: string;
+}
+
+export interface Family {
+  id: string;
+  name: string;
+  created_by: string | null;
+  created_at?: string;
+}
+
+export interface FamilyInvitation {
+  id: string;
+  family_id: string;
+  email: string;
+  role: 'parent' | 'child';
+  token: string;
+  invited_by: string | null;
+  status: 'pending' | 'accepted';
+  expires_at: string;
+  created_at?: string;
 }

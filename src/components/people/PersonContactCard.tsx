@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type Person, type Chore, type Streak } from "@/types/entities";
+import { type Profile, type Chore, type Streak } from "@/types/entities";
 import { type WeekStats } from "@/components/shared/weekUtils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pencil, Trash2, DollarSign, ListChecks, Flame, Calendar, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
@@ -27,11 +27,11 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 interface PersonContactCardProps {
-  person: Person;
+  person: Profile;
   index: number;
   chores: Chore[];
-  onEdit: () => void;
-  onDelete: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
   weeklyStats?: WeekStats | null;
   streakData?: Streak | null;
 }
@@ -180,23 +180,28 @@ export default function PersonContactCard({ person, index, chores, onEdit, onDel
           )}
         </AnimatePresence>
 
-        {/* Action buttons */}
-        <div className="flex gap-2 mt-4">
-          <Button
-            size="sm" variant="outline"
-            className="flex-1 gap-1.5 text-xs h-8 rounded-xl"
-            onClick={(e) => { e.stopPropagation(); onEdit(); }}
-          >
-            <Pencil className="w-3 h-3" /> Edit
-          </Button>
-          <Button
-            size="sm" variant="outline"
-            className="flex-1 gap-1.5 text-xs h-8 rounded-xl text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40"
-            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          >
-            <Trash2 className="w-3 h-3" /> Remove
-          </Button>
-        </div>
+        {(onEdit || onDelete) && (
+          <div className="flex gap-2 mt-4">
+            {onEdit && (
+              <Button
+                size="sm" variant="outline"
+                className="flex-1 gap-1.5 text-xs h-8 rounded-xl"
+                onClick={(e) => { e.stopPropagation(); onEdit(); }}
+              >
+                <Pencil className="w-3 h-3" /> Edit
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                size="sm" variant="outline"
+                className="flex-1 gap-1.5 text-xs h-8 rounded-xl text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40"
+                onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              >
+                <Trash2 className="w-3 h-3" /> Remove
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </motion.div>
   );

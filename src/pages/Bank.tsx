@@ -439,7 +439,7 @@ function PayoutRow({ payout, child, onMarkPaid, isMarkingPaid, index }) {
 
 function ParentCard({ person, personIndex, pendingPayouts, onMarkPaid, isMarkingPaid, allPeople }) {
   const myPending = pendingPayouts.filter(p => {
-    const child = allPeople.find(x => x.id === p.person_id);
+    const child = allPeople.find(x => x.id === p.profile_id);
     return child && !child.is_parent;
   });
   const totalPending = myPending.reduce((s, p) => s + p.amount, 0);
@@ -522,7 +522,7 @@ function ParentCard({ person, personIndex, pendingPayouts, onMarkPaid, isMarking
                   Pending Approvals
                 </motion.div>
                 {myPending.map((payout, i) => {
-                  const child = allPeople.find(x => x.id === payout.person_id);
+                  const child = allPeople.find(x => x.id === payout.profile_id);
                   if (!child) return null;
                   return (
                     <PayoutRow
@@ -622,7 +622,7 @@ export default function Bank() {
   // burstState: { personId, pieces } | null
   const [burstState, setBurstState] = useState(null);
 
-  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Person.list() });
+  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() });
   const { data: streaks = [] } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list(), refetchInterval: 1000 });
   const { data: payouts = [] } = useQuery({ queryKey: ["payouts"], queryFn: () => entities.Payout.list(), refetchInterval: 1000 });
 
@@ -638,12 +638,12 @@ export default function Bank() {
   const activePeople = people.filter(p => p.active !== false);
   const kids = activePeople.filter(p => !p.is_parent);
   const parents = activePeople.filter(p => p.is_parent);
-  const streakMap = useMemo(() => Object.fromEntries(streaks.map(s => [s.person_id, s])), [streaks]);
+  const streakMap = useMemo(() => Object.fromEntries(streaks.map(s => [s.profile_id, s])), [streaks]);
 
   const getKidFinancials = (person) => {
     const earned = streakMap[person.id]?.total_rewards_earned || 0;
-    const paid = payouts.filter(p => p.person_id === person.id && p.status === "paid").reduce((s, p) => s + p.amount, 0);
-    const pending = payouts.filter(p => p.person_id === person.id && p.status === "pending").reduce((s, p) => s + p.amount, 0);
+    const paid = payouts.filter(p => p.profile_id === person.id && p.status === "paid").reduce((s, p) => s + p.amount, 0);
+    const pending = payouts.filter(p => p.profile_id === person.id && p.status === "pending").reduce((s, p) => s + p.amount, 0);
     const available = Math.max(0, earned - paid - pending);
     return { earned, paid, pending, available };
   };
@@ -655,7 +655,7 @@ export default function Bank() {
     const pieces = breakIntoNotes(amount);
     setBurstState({ personId: person.id, pieces });
     await createPayoutMutation.mutateAsync({
-      person_id: person.id, amount, status: "pending",
+      profile_id: person.id, amount, status: "pending",
       requested_date: formatDate(new Date()),
     });
   };

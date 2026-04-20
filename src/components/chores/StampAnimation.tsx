@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
- 
+interface StampAnimationProps { cardRect: DOMRect | null; }
 
 export default function StampAnimation({ cardRect }: StampAnimationProps) {
   if (!cardRect) return null;

@@ -1,12 +1,17 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Palette, RotateCcw, Check, Sparkles, Plus, Trash2, X, Bell, DollarSign, Globe } from "lucide-react";
+import { Palette, RotateCcw, Check, Sparkles, Plus, Trash2, X, Bell, DollarSign, Globe, LogOut, Users, UserPlus, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { useQueryClient } from "@tanstack/react-query";
+import FamilyMemberList from "@/components/family/FamilyMemberList";
+import InviteDialog from "@/components/family/InviteDialog";
 
-type ThemeVars = { primary: string; accent: string; background: string; foreground: string; card: string; [key: string]: string };
+type ThemeVars = { primary: string; accent: string; background: string; foreground: string; card: string;[key: string]: string };
 
 function hslToHex(hslStr: string): string {
   if (!hslStr) return "#888888";
@@ -102,30 +107,54 @@ interface ThemeDef {
 }
 
 const BUILT_IN_THEMES: ThemeDef[] = [
-  { name: "Indigo",   dot1: "#6655d4", dot2: "#f59e0b", dot3: "#f6f7fb",
-    vars: { primary: "245 58% 51%", accent: "33 90% 55%", background: "225 20% 97%", foreground: "230 25% 10%", card: "0 0% 100%" } },
-  { name: "Forest",   dot1: "#2e8a57", dot2: "#d97706", dot3: "#f5fbf7",
-    vars: { primary: "142 50% 36%", accent: "35 80% 50%", background: "140 18% 97%", foreground: "150 30% 9%", card: "0 0% 100%" } },
-  { name: "Ocean",    dot1: "#1a7fb5", dot2: "#17a2b8", dot3: "#f2f8fd",
-    vars: { primary: "200 72% 42%", accent: "190 65% 38%", background: "210 22% 97%", foreground: "220 30% 9%", card: "0 0% 100%" } },
-  { name: "Sunset",   dot1: "#e0541e", dot2: "#c42d5a", dot3: "#fdf9f6",
-    vars: { primary: "16 82% 53%", accent: "338 72% 50%", background: "20 22% 98%", foreground: "20 35% 8%", card: "0 0% 100%" } },
-  { name: "Lavender", dot1: "#8a56c7", dot2: "#d44fa0", dot3: "#f8f4fd",
-    vars: { primary: "270 56% 56%", accent: "318 62% 56%", background: "270 22% 97%", foreground: "270 28% 10%", card: "0 0% 100%" } },
-  { name: "Rose",     dot1: "#d4345a", dot2: "#de7010", dot3: "#fdf6f8",
-    vars: { primary: "344 76% 52%", accent: "30 86% 52%", background: "350 22% 98%", foreground: "340 28% 9%", card: "0 0% 100%" } },
-  { name: "Midnight", dot1: "#8070e0", dot2: "#f59e0b", dot3: "#0e1119",
-    vars: { primary: "248 65% 65%", accent: "38 92% 58%", background: "230 22% 7%", foreground: "220 15% 93%", card: "228 20% 11%" } },
-  { name: "Charcoal", dot1: "#90a8c5", dot2: "#d4a017", dot3: "#181d23",
-    vars: { primary: "214 28% 62%", accent: "44 82% 54%", background: "220 16% 9%", foreground: "220 12% 88%", card: "220 14% 13%" } },
-  { name: "Mint",     dot1: "#24907a", dot2: "#2080b0", dot3: "#f4fbf8",
-    vars: { primary: "162 57% 38%", accent: "202 68% 44%", background: "165 20% 97%", foreground: "165 28% 9%", card: "0 0% 100%" } },
-  { name: "Amber",    dot1: "#c47a10", dot2: "#c43318", dot3: "#fdfaf3",
-    vars: { primary: "38 94% 46%", accent: "14 86% 52%", background: "40 28% 98%", foreground: "35 32% 9%", card: "0 0% 100%" } },
-  { name: "Candy",    dot1: "#cc3d8a", dot2: "#0e9988", dot3: "#fdf4fb",
-    vars: { primary: "320 72% 55%", accent: "178 68% 42%", background: "312 22% 98%", foreground: "320 28% 9%", card: "0 0% 100%" } },
-  { name: "Deep Sea", dot1: "#0e82a2", dot2: "#148964", dot3: "#060e18",
-    vars: { primary: "196 82% 36%", accent: "162 62% 34%", background: "212 28% 6%", foreground: "200 18% 90%", card: "210 24% 10%" } },
+  {
+    name: "Indigo", dot1: "#6655d4", dot2: "#f59e0b", dot3: "#f6f7fb",
+    vars: { primary: "245 58% 51%", accent: "33 90% 55%", background: "225 20% 97%", foreground: "230 25% 10%", card: "0 0% 100%" }
+  },
+  {
+    name: "Forest", dot1: "#2e8a57", dot2: "#d97706", dot3: "#f5fbf7",
+    vars: { primary: "142 50% 36%", accent: "35 80% 50%", background: "140 18% 97%", foreground: "150 30% 9%", card: "0 0% 100%" }
+  },
+  {
+    name: "Ocean", dot1: "#1a7fb5", dot2: "#17a2b8", dot3: "#f2f8fd",
+    vars: { primary: "200 72% 42%", accent: "190 65% 38%", background: "210 22% 97%", foreground: "220 30% 9%", card: "0 0% 100%" }
+  },
+  {
+    name: "Sunset", dot1: "#e0541e", dot2: "#c42d5a", dot3: "#fdf9f6",
+    vars: { primary: "16 82% 53%", accent: "338 72% 50%", background: "20 22% 98%", foreground: "20 35% 8%", card: "0 0% 100%" }
+  },
+  {
+    name: "Lavender", dot1: "#8a56c7", dot2: "#d44fa0", dot3: "#f8f4fd",
+    vars: { primary: "270 56% 56%", accent: "318 62% 56%", background: "270 22% 97%", foreground: "270 28% 10%", card: "0 0% 100%" }
+  },
+  {
+    name: "Rose", dot1: "#d4345a", dot2: "#de7010", dot3: "#fdf6f8",
+    vars: { primary: "344 76% 52%", accent: "30 86% 52%", background: "350 22% 98%", foreground: "340 28% 9%", card: "0 0% 100%" }
+  },
+  {
+    name: "Midnight", dot1: "#8070e0", dot2: "#f59e0b", dot3: "#0e1119",
+    vars: { primary: "248 65% 65%", accent: "38 92% 58%", background: "230 22% 7%", foreground: "220 15% 93%", card: "228 20% 11%" }
+  },
+  {
+    name: "Charcoal", dot1: "#90a8c5", dot2: "#d4a017", dot3: "#181d23",
+    vars: { primary: "214 28% 62%", accent: "44 82% 54%", background: "220 16% 9%", foreground: "220 12% 88%", card: "220 14% 13%" }
+  },
+  {
+    name: "Mint", dot1: "#24907a", dot2: "#2080b0", dot3: "#f4fbf8",
+    vars: { primary: "162 57% 38%", accent: "202 68% 44%", background: "165 20% 97%", foreground: "165 28% 9%", card: "0 0% 100%" }
+  },
+  {
+    name: "Amber", dot1: "#c47a10", dot2: "#c43318", dot3: "#fdfaf3",
+    vars: { primary: "38 94% 46%", accent: "14 86% 52%", background: "40 28% 98%", foreground: "35 32% 9%", card: "0 0% 100%" }
+  },
+  {
+    name: "Candy", dot1: "#cc3d8a", dot2: "#0e9988", dot3: "#fdf4fb",
+    vars: { primary: "320 72% 55%", accent: "178 68% 42%", background: "312 22% 98%", foreground: "320 28% 9%", card: "0 0% 100%" }
+  },
+  {
+    name: "Deep Sea", dot1: "#0e82a2", dot2: "#148964", dot3: "#060e18",
+    vars: { primary: "196 82% 36%", accent: "162 62% 34%", background: "212 28% 6%", foreground: "200 18% 90%", card: "210 24% 10%" }
+  },
 ];
 
 const CUSTOM_KEY = "choretracker-custom-themes";
@@ -134,16 +163,16 @@ const ACTIVE_NAME_KEY = "choretracker-active-name";
 const PREFS_KEY = "choretracker-prefs";
 
 const SPECTRUM = [
-  "#ef4444","#f97316","#eab308","#84cc16","#22c55e",
-  "#14b8a6","#06b6d4","#3b82f6","#8b5cf6","#ec4899","#f43f5e",
+  "#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e",
+  "#14b8a6", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899", "#f43f5e",
 ];
 
 const COLOR_FIELDS: { key: string; label: string; desc: string }[] = [
-  { key: "primary",    label: "Primary",    desc: "Buttons & active states" },
-  { key: "accent",     label: "Accent",     desc: "Highlights & badges" },
+  { key: "primary", label: "Primary", desc: "Buttons & active states" },
+  { key: "accent", label: "Accent", desc: "Highlights & badges" },
   { key: "background", label: "Background", desc: "Page background" },
-  { key: "foreground", label: "Text",       desc: "Main text color" },
-  { key: "card",       label: "Card",       desc: "Card surface" },
+  { key: "foreground", label: "Text", desc: "Main text color" },
+  { key: "card", label: "Card", desc: "Card surface" },
 ];
 
 interface ColorSwatchProps {
@@ -303,6 +332,24 @@ const DEFAULT_PREFS = {
 };
 
 export default function Settings() {
+  const { signOut, isParent, family, refreshProfile } = useAuth();
+  const queryClient = useQueryClient();
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [editingFamilyName, setEditingFamilyName] = useState(false);
+  const [familyNameInput, setFamilyNameInput] = useState('');
+  const [savingFamilyName, setSavingFamilyName] = useState(false);
+
+  const saveFamilyName = useCallback(async () => {
+    if (!family || !familyNameInput.trim()) return;
+    setSavingFamilyName(true);
+    await supabase.from('families').update({ name: familyNameInput.trim() }).eq('id', family.id);
+    await Promise.all([
+      refreshProfile(),
+      queryClient.invalidateQueries({ queryKey: ['family-profiles', family.id] }),
+    ]);
+    setSavingFamilyName(false);
+    setEditingFamilyName(false);
+  }, [family, familyNameInput, queryClient, refreshProfile]);
   const [current, setCurrent] = useState<ThemeVars>(() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null") || DEFAULT_THEME; } catch { return DEFAULT_THEME; }
   });
@@ -375,6 +422,60 @@ export default function Settings() {
       </div>
 
       <div className="max-w-3xl space-y-6">
+        {isParent && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary" /> Family
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-3">
+                {editingFamilyName ? (
+                  <div className="flex flex-1 items-center gap-2">
+                    <Input
+                      value={familyNameInput}
+                      onChange={e => setFamilyNameInput(e.target.value)}
+                      className="h-9 rounded-xl text-sm flex-1"
+                      autoFocus
+                      onKeyDown={e => { if (e.key === 'Enter') saveFamilyName(); if (e.key === 'Escape') setEditingFamilyName(false); }}
+                    />
+                    <Button size="sm" className="h-9 rounded-xl px-4 text-xs" onClick={saveFamilyName} disabled={savingFamilyName}>
+                      {savingFamilyName ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-9 rounded-xl" onClick={() => setEditingFamilyName(false)}>
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-1 items-center justify-between">
+                    <div>
+                      <div className="text-sm font-bold text-foreground">{family?.name}</div>
+                      <div className="text-xs text-muted-foreground">Family name</div>
+                    </div>
+                    <Button size="sm" variant="outline" className="h-8 rounded-xl gap-1.5 text-xs"
+                      onClick={() => { setFamilyNameInput(family?.name ?? ''); setEditingFamilyName(true); }}>
+                      <Pencil className="w-3 h-3" /> Edit
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <FamilyMemberList />
+
+              <Button
+                variant="outline"
+                className="w-full gap-2 h-10 rounded-xl text-sm font-semibold"
+                onClick={() => setInviteOpen(true)}
+              >
+                <UserPlus className="w-4 h-4" /> Invite Member
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        <InviteDialog open={inviteOpen} onOpenChange={setInviteOpen} />
+
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="text-base flex items-center gap-2">
@@ -532,6 +633,23 @@ export default function Settings() {
             <RotateCcw className="w-4 h-4" /> Reset Theme
           </Button>
         </div>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <LogOut className="w-4 h-4 text-destructive" /> Account
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button
+              variant="outline"
+              className="gap-2 h-11 rounded-xl font-semibold text-destructive border-destructive/30 hover:bg-destructive/10 hover:border-destructive"
+              onClick={signOut}
+            >
+              <LogOut className="w-4 h-4" /> Sign out
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

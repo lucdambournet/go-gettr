@@ -1,39 +1,55 @@
-**Welcome to your Base44 project** 
+# GoGettr
 
-**About**
+A family chore and task management app. Assign chores, track weekly progress, and manage your family — all in one place.
 
-View and Edit  your app on [Base44.com](http://Base44.com) 
+## Stack
 
-This project contains everything you need to run your app locally.
+- **Frontend:** React 18 + TypeScript, Vite, Tailwind CSS, shadcn/ui, Framer Motion
+- **Data:** TanStack Query, React Router v6
+- **Backend:** Supabase (auth + Postgres database)
 
-**Edit the code in your local development environment**
+## Getting started
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+```bash
+# 1. Install dependencies
+npm install
 
-**Prerequisites:** 
-
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
-
-```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
-
-e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
+# 2. Configure environment
+cp .env.example .env.local  # then fill in your values
 ```
 
-Run the app: `npm run dev`
+`.env.local` variables:
 
-**Publish your changes**
+```
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_APP_NAME=GoGettr        # optional
+VITE_APP_ICON=               # optional — URL to app icon
+```
 
-Open [Base44.com](http://Base44.com) and click on Publish.
+```bash
+# 3. Start the dev server
+npm run dev   # http://localhost:5173
+```
 
-**Docs & Support**
+## Commands
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
+| Command | Description |
+|---|---|
+| `npm run dev` | Start dev server |
+| `npm run build` | Type-check + production build |
+| `npm run typecheck` | Type-check without emitting |
+| `npm run lint` | ESLint (errors only) |
+| `npm run lint:fix` | ESLint with auto-fix |
+| `npx playwright test` | Run all e2e tests |
+| `npx playwright test --ui` | Interactive test runner |
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+> E2e tests target `http://localhost:5173` — start the dev server first.
+
+## Features
+
+- Google authentication via Supabase Auth
+- Family setup: create a family, invite parents and children via email or invite link
+- Weekly chore view with assignment and completion tracking
+- Animated sidebar layout with mobile drawer support
+- Runtime theme customisation via Settings

@@ -61,12 +61,12 @@ export default function DevPanel() {
 
   const addLog = (msg, type = "info") => setLog(prev => [{ msg: `[${new Date().toLocaleTimeString()}] ${msg}`, type }, ...prev].slice(0, 50));
 
-  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Person.list() });
+  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() });
   const { data: streaks = [] } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list() });
   const { data: choreLogs = [] } = useQuery({ queryKey: ["allChoreLogs"], queryFn: () => entities.ChoreLog.list() });
   const { data: payouts = [] } = useQuery({ queryKey: ["payouts"], queryFn: () => entities.Payout.list() });
 
-  const streakMap = useMemo(() => Object.fromEntries(streaks.map(s => [s.person_id, s])), [streaks]);
+  const streakMap = useMemo(() => Object.fromEntries(streaks.map(s => [s.profile_id, s])), [streaks]);
   const activePeople = people.filter(p => p.active !== false);
   const kids = activePeople.filter(p => !p.is_parent);
 
@@ -106,7 +106,7 @@ export default function DevPanel() {
       if (streak) {
         await updateStreak.mutateAsync({ id: streak.id, data: { total_rewards_earned: newTotal } });
       } else {
-        await createStreak.mutateAsync({ person_id: person.id, current_streak: 0, longest_streak: 0, last_checkin_date: null, total_rewards_earned: amount });
+        await createStreak.mutateAsync({ profile_id: person.id, current_streak: 0, longest_streak: 0, last_checkin_date: null, total_rewards_earned: amount });
       }
       const noteStr = note ? ` (${note})` : "";
       addLog(`Added $${amount.toFixed(2)} to ${person.name}'s bank${noteStr}`, "success");
@@ -127,12 +127,12 @@ export default function DevPanel() {
         if (!person.weekly_allowance || person.weekly_allowance <= 0) continue;
         // Refetch fresh streak data for each iteration
         const freshStreaks = await entities.Streak.list();
-        const freshStreak = freshStreaks.find(s => s.person_id === person.id);
+        const freshStreak = freshStreaks.find(s => s.profile_id === person.id);
         const newAmount = (freshStreak?.total_rewards_earned || 0) + person.weekly_allowance;
         if (freshStreak) {
           await updateStreak.mutateAsync({ id: freshStreak.id, data: { total_rewards_earned: newAmount } });
         } else {
-          await createStreak.mutateAsync({ person_id: person.id, current_streak: 0, longest_streak: 0, last_checkin_date: null, total_rewards_earned: person.weekly_allowance });
+          await createStreak.mutateAsync({ profile_id: person.id, current_streak: 0, longest_streak: 0, last_checkin_date: null, total_rewards_earned: person.weekly_allowance });
         }
         addLog(`Credited $${person.weekly_allowance.toFixed(2)} weekly allowance to ${person.name}`, "success");
       }
@@ -316,8 +316,8 @@ export default function DevPanel() {
               {kids.map((person, i) => {
                 const streak = streakMap[person.id];
                 const balance = streak?.total_rewards_earned || 0;
-                const paid = payouts.filter(p => p.person_id === person.id && p.status === "paid").reduce((s, p) => s + p.amount, 0);
-                const pending = payouts.filter(p => p.person_id === person.id && p.status === "pending").reduce((s, p) => s + p.amount, 0);
+                const paid = payouts.filter(p => p.profile_id === person.id && p.status === "paid").reduce((s, p) => s + p.amount, 0);
+                const pending = payouts.filter(p => p.profile_id === person.id && p.status === "pending").reduce((s, p) => s + p.amount, 0);
                 const available = Math.max(0, balance - paid - pending);
                 return (
                   <div key={person.id} className="flex items-center gap-2 text-xs py-1.5 border-b border-border/50 last:border-0">

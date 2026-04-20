@@ -1,6 +1,6 @@
 import { useMemo, useEffect, useState, type ElementType } from "react";
 import { entities } from "@/api/entities";
-import { type Person, type Chore, type ChoreLog, type Streak } from "@/types/entities";
+import { type Profile, type Chore, type ChoreLog, type Streak } from "@/types/entities";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -99,7 +99,7 @@ export default function Dashboard() {
   const { requestPermission, sendNotification, permission } = useNotifications();
   const [notifEnabled, setNotifEnabled] = useState(permission === "granted");
 
-  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Person.list() as Promise<Person[]> });
+  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
   const { data: chores = [] } = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
   const { data: logs = [] } = useQuery({
     queryKey: ["choreLogs", weekStartStr],
@@ -116,7 +116,7 @@ export default function Dashboard() {
     return map;
   }, [logs]);
 
-  const streakMap = useMemo(() => Object.fromEntries(streaks.map((s) => [s.person_id, s])), [streaks]);
+  const streakMap = useMemo(() => Object.fromEntries(streaks.map((s) => [s.profile_id, s])), [streaks]);
 
   // Today's progress per person (used for progress bars)
   const stats = useMemo(() => {

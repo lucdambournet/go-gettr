@@ -56,11 +56,61 @@ function makeEntity(tableName: string) {
   };
 }
 
+function addProfileComputedFields(row: Row): Row {
+  return {
+    ...row,
+    created_date: row.created_at,
+    name: `${row.first_name ?? ''} ${row.last_name ?? ''}`.trim(),
+    is_parent: row.role === 'parent',
+  };
+}
+
+const profileBase = makeEntity('profiles');
+
+const profileEntity = {
+  async list(sort?: string, limit?: number) {
+    const rows = await profileBase.list(sort, limit);
+    return rows.map(addProfileComputedFields);
+  },
+  async filter(filters: Row) {
+    const rows = await profileBase.filter(filters);
+    return rows.map(addProfileComputedFields);
+  },
+  async create(data: Row) {
+    const row = await profileBase.create(data);
+    return addProfileComputedFields(row);
+  },
+  async update(id: string, data: Row) {
+    const row = await profileBase.update(id, data);
+    return addProfileComputedFields(row);
+  },
+  async delete(id: string) {
+    return profileBase.delete(id);
+  },
+};
+
 export const entities = {
-  Person: makeEntity('person'),
+  Profile: profileEntity,
   Chore: makeEntity('chore'),
   ChoreLog: makeEntity('chore_log'),
   Streak: makeEntity('streak'),
   Payout: makeEntity('payout'),
   Notification: makeEntity('notification'),
+  Achievement: makeEntity('achievement'),
+  Family: makeEntity('families'),
+  FamilyInvitation: makeEntity('family_invitations'),
 };
+
+export async function searchProfileByEmail(email: string) {
+  const { data, error } = await supabase.rpc('search_profile_by_email', { search_email: email });
+  if (error) throw error;
+  return (data ?? []).map(addProfileComputedFields);
+}
+
+export async function addProfileToFamily(targetProfileId: string, role: 'parent' | 'child') {
+  const { error } = await supabase.rpc('add_profile_to_family', {
+    target_profile_id: targetProfileId,
+    target_role: role,
+  });
+  if (error) throw error;
+}

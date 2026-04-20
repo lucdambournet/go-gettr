@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { entities } from "@/api/entities";
-import { type Notification, type Person } from "@/types/entities";
+import { type Notification, type Profile } from "@/types/entities";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,13 +21,13 @@ const TYPE_META = {
 
 function NotificationItem({ notif, people, onMarkRead, onDelete, index }: {
   notif: Notification;
-  people: Person[];
+  people: Profile[];
   onMarkRead: (n: Notification) => void;
   onDelete: (n: Notification) => void;
   index: number;
 }) {
   const meta = TYPE_META[notif.type as keyof typeof TYPE_META] || TYPE_META.chore_completed;
-  const person = people.find((p: Person) => p.id === notif.person_id);
+  const person = people.find((p: Profile) => p.id === notif.profile_id);
   const timeAgo = useMemo(() => {
     const diff = Date.now() - new Date(notif.created_date).getTime();
     const mins = Math.floor(diff / 60000);
@@ -108,7 +108,7 @@ export default function Notifications() {
   });
   const { data: people = [] } = useQuery({
     queryKey: ["people"],
-    queryFn: () => entities.Person.list() as Promise<Person[]>,
+    queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]>,
   });
 
   const updateMutation = useMutation({

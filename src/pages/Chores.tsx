@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { entities } from "@/api/entities";
-import { type Person, type Chore } from "@/types/entities";
+import { type Profile, type Chore } from "@/types/entities";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -126,7 +126,7 @@ export default function Chores() {
   const queryClient = useQueryClient();
 
   const { data: chores = [], isLoading } = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
-  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Person.list() as Promise<Person[]> });
+  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
 
   const createMutation = useMutation({
     mutationFn: (data: Partial<Chore>) => entities.Chore.create(data) as Promise<Chore>,

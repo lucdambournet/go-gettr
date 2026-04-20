@@ -7,6 +7,6 @@ import { applyStoredTheme } from '@/lib/applyStoredTheme'
 // Apply saved theme immediately before first render so it's consistent on every page
 applyStoredTheme()
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <App />
 )

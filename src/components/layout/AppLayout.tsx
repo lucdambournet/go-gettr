@@ -8,6 +8,8 @@ import PageFade from "@/components/layout/PageFade";
 import { useNotificationBadge } from "@/hooks/useNotificationBadge";
 import { useAppManifest } from "@/hooks/useAppManifest";
 import { soundNav, soundMenuOpen, soundMenuClose } from "@/lib/useSound";
+import { useAuth } from "@/lib/AuthContext";
+import { LogOut } from "lucide-react";
 
 // ── Unique colorful nav icons (SVG-based for multi-color) ──────────────────
 
@@ -311,6 +313,7 @@ export default function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { name: appName, icon: appIcon } = useAppManifest();
+  const { signOut } = useAuth();
 
   const sidebarWidth = sidebarCollapsed ? 56 : 256;
 
@@ -375,6 +378,33 @@ export default function AppLayout() {
             );
           })}
         </nav>
+
+        {/* Sign out */}
+        <div className="p-2 border-t border-border shrink-0">
+          {sidebarCollapsed ? (
+            <div className="relative group">
+              <button
+                onClick={signOut}
+                className="flex items-center justify-center w-10 h-10 rounded-xl text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+              <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap shadow-lg bg-popover text-foreground border border-border">
+                  Sign out
+                </div>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={signOut}
+              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+            >
+              <LogOut className="w-4 h-4 shrink-0" />
+              Sign out
+            </button>
+          )}
+        </div>
       </motion.aside>
 
       {/* Collapse toggle */}
@@ -462,6 +492,15 @@ export default function AppLayout() {
                   </motion.div>
                 );
               })}
+              <div className="border-t border-border pt-2 mt-2">
+                <button
+                  onClick={() => { setMobileOpen(false); signOut(); }}
+                  className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                >
+                  <LogOut className="w-4 h-4 shrink-0" />
+                  Sign out
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

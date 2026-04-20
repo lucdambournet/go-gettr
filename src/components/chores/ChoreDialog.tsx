@@ -1,5 +1,5 @@
 import { useState, useEffect, type ElementType } from "react";
-import { type Person, type Chore } from "@/types/entities";
+import { type Profile, type Chore } from "@/types/entities";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,7 +60,7 @@ interface ChoreDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   chore?: Chore | null;
-  people: Person[];
+  people: Profile[];
   onSave: (data: Partial<Chore>) => void;
   isSaving?: boolean;
 }
