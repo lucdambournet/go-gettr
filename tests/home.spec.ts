@@ -68,6 +68,6 @@ test.describe('Home page (Daily)', () => {
   });
 
   test('page title is ChoreQuest', async ({ page }) => {
-    await expect(page).toHaveTitle('ChoreQuest');
+    await expect(page).toHaveTitle('GoGettr');
   });
 });
