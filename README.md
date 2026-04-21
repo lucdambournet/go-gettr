@@ -21,35 +21,22 @@ cp .env.example .env.local  # then fill in your values
 `.env.local` variables:
 
 ```
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_APP_NAME=GoGettr        # optional
-VITE_APP_ICON=               # optional — URL to app icon
+VITE_BASE44_APP_ID=your_app_id
+VITE_BASE44_APP_BASE_URL=your_backend_url
+
+e.g.
+VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
+VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
 ```
 
-```bash
-# 3. Start the dev server
-npm run dev   # http://localhost:5173
-```
+Run the app: `npm run dev`
 
-## Commands
+**Publish your changes**
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start dev server |
-| `npm run build` | Type-check + production build |
-| `npm run typecheck` | Type-check without emitting |
-| `npm run lint` | ESLint (errors only) |
-| `npm run lint:fix` | ESLint with auto-fix |
-| `npx playwright test` | Run all e2e tests |
-| `npx playwright test --ui` | Interactive test runner |
+Open [Base44.com](http://Base44.com) and click on Publish.
 
-> E2e tests target `http://localhost:5173` — start the dev server first.
+**Docs & Support**
 
-## Features
+Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
 
-- Google authentication via Supabase Auth
-- Family setup: create a family, invite parents and children via email or invite link
-- Weekly chore view with assignment and completion tracking
-- Animated sidebar layout with mobile drawer support
-- Runtime theme customisation via Settings
+Support: [https://app.base44.com/support](https://app.base44.com/support)

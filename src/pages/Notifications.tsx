@@ -141,7 +141,7 @@ export default function Notifications() {
   }, [notifications]);
 
   return (
-    <div className="space-y-8 max-w-2xl mx-auto">
+    <div className="space-y-8">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
         <div className="relative -mx-4 md:-mx-8 -mt-4 md:-mt-8 px-4 md:px-8 pt-8 md:pt-10 pb-6 overflow-hidden"
@@ -171,6 +171,7 @@ export default function Notifications() {
         </div>
       </motion.div>
 
+      <div className="max-w-2xl mx-auto space-y-8">
       {/* Empty state */}
       {notifications.length === 0 && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -214,6 +215,7 @@ export default function Notifications() {
           )
         )}
       </AnimatePresence>
+      </div>
     </div>
   );
 }

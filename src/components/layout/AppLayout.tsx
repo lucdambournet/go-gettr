@@ -513,7 +513,7 @@ export default function AppLayout() {
         className="flex-1 pt-14 md:pt-0"
         style={{ marginLeft: sidebarWidth }}
       >
-        <div className="p-4 md:p-8 max-w-6xl mx-auto">
+        <div className="p-4 md:p-8">
           <PageFade key={location.pathname}>
             <Outlet />
           </PageFade>
