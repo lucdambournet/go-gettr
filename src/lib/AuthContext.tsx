@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback, type React
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { inviteStorage } from '@/lib/inviteStorage';
+import { clearE2EAuthState, isE2EMockAuthEnabled, readE2EAuthState } from '@/lib/e2eAuth';
 import type { Profile, Family } from '@/types/entities';
 
 interface AuthError {
@@ -102,6 +103,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (isE2EMockAuthEnabled()) {
+      const state = readE2EAuthState();
+
+      setUser(state?.user ? (state.user as User) : null);
+      setProfile(state?.profile ?? null);
+      setFamily(state?.family ?? null);
+      setAuthError(state?.user ? null : { type: 'auth_required' });
+      setIsLoadingAuth(false);
+      setIsLoadingProfile(false);
+      return;
+    }
+
     // onAuthStateChange fires immediately with the current session (INITIAL_SESSION),
     // so getSession() is not needed and would cause a redundant loadProfile call.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -121,10 +134,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadProfile]);
 
   const signOut = async () => {
+    if (isE2EMockAuthEnabled()) {
+      clearE2EAuthState();
+      setUser(null);
+      setProfile(null);
+      setFamily(null);
+      setAuthError({ type: 'auth_required' });
+      return;
+    }
+
     await supabase.auth.signOut();
   };
 
   const refreshProfile = useCallback(async () => {
+    if (isE2EMockAuthEnabled()) {
+      const state = readE2EAuthState();
+      setUser(state?.user ? (state.user as User) : null);
+      setProfile(state?.profile ?? null);
+      setFamily(state?.family ?? null);
+      setAuthError(state?.user ? null : { type: 'auth_required' });
+      return;
+    }
+
     if (user) await loadProfile(user);
   }, [user, loadProfile]);
 
