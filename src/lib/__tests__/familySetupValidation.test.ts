@@ -60,4 +60,40 @@ describe('familySetupValidation', () => {
       },
     ]);
   });
+
+  it('requires username-mode children to use unique usernames within the draft', () => {
+    expect(
+      validateChildrenStep([
+        {
+          firstName: 'Mia',
+          lastName: 'Paul',
+          birthdate: '2016-01-01',
+          accountMode: 'username',
+          email: '',
+          username: 'mia',
+          starterPassword: 'Paul123',
+          choresInput: '',
+          chores: [],
+        },
+        {
+          firstName: 'Leo',
+          lastName: 'Paul',
+          birthdate: '2018-01-01',
+          accountMode: 'username',
+          email: '',
+          username: 'MIA',
+          starterPassword: 'Paul123',
+          choresInput: '',
+          chores: [],
+        },
+      ]),
+    ).toEqual([
+      {
+        username: 'Choose a unique username.',
+      },
+      {
+        username: 'Choose a unique username.',
+      },
+    ]);
+  });
 });

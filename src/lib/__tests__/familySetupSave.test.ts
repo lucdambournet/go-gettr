@@ -56,5 +56,10 @@ describe('familySetupSave', () => {
       2,
       expect.objectContaining({ title: 'Wash dishes', assigned_to: null }),
     );
+    expect(db.createChildProfile).toHaveBeenCalledWith(
+      expect.objectContaining({
+        birthdate: '2016-01-01',
+      }),
+    );
   });
 });

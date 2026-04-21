@@ -7,6 +7,7 @@ export interface Profile {
   name: string;
   email: string;
   phone_number?: string | null;
+  birthdate?: string | null;
   role: 'parent' | 'child';
   /** Computed by the API layer: role === 'parent' */
   is_parent: boolean;

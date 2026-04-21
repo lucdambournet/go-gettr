@@ -67,6 +67,22 @@ export function validateParentDetailsStep(draft: Pick<FamilySetupDraft, 'parent'
 }
 
 export function validateChildrenStep(children: FamilySetupChildDraft[]): FamilySetupChildErrors[] {
+  const usernameCounts = new Map<string, number>();
+
+  children.forEach((child) => {
+    if (child.accountMode !== 'username') {
+      return;
+    }
+
+    const normalizedUsername = child.username.trim().toLowerCase();
+
+    if (!normalizedUsername) {
+      return;
+    }
+
+    usernameCounts.set(normalizedUsername, (usernameCounts.get(normalizedUsername) ?? 0) + 1);
+  });
+
   return children.map((child) => {
     const errors: FamilySetupChildErrors = {};
 
@@ -92,8 +108,14 @@ export function validateChildrenStep(children: FamilySetupChildDraft[]): FamilyS
       }
     }
 
-    if (child.accountMode === 'username' && !child.username.trim()) {
-      errors.username = 'Enter a username.';
+    if (child.accountMode === 'username') {
+      const normalizedUsername = child.username.trim().toLowerCase();
+
+      if (!normalizedUsername) {
+        errors.username = 'Enter a username.';
+      } else if ((usernameCounts.get(normalizedUsername) ?? 0) > 1) {
+        errors.username = 'Choose a unique username.';
+      }
     }
 
     return errors;

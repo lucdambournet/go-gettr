@@ -37,17 +37,63 @@ const SUGGESTED_CHORES = [
   'Set the table',
 ];
 
+function sanitizeUsernameSeed(value: string) {
+  return value
+    .normalize('NFKC')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function suggestUniqueUsername(children: FamilySetupChildDraft[], targetIndex: number, child: FamilySetupChildDraft) {
+  const baseUsername =
+    sanitizeUsernameSeed(child.username) ||
+    sanitizeUsernameSeed(child.firstName) ||
+    sanitizeUsernameSeed(`${child.firstName}-${child.lastName}`) ||
+    `child-${targetIndex + 1}`;
+
+  const takenUsernames = new Set(
+    children
+      .map((currentChild, index) =>
+        index === targetIndex || currentChild.accountMode !== 'username'
+          ? ''
+          : currentChild.username.trim().toLowerCase(),
+      )
+      .filter(Boolean),
+  );
+
+  let candidate = baseUsername;
+  let suffix = 2;
+
+  while (takenUsernames.has(candidate)) {
+    candidate = `${baseUsername}${suffix}`;
+    suffix += 1;
+  }
+
+  return candidate;
+}
+
 function createEmptyChildDraft(): FamilySetupChildDraft {
   return createEmptyFamilySetupDraft({ childCount: 1 }).children[0] as FamilySetupChildDraft;
 }
 
-function withChildDerivedFields(child: FamilySetupChildDraft): FamilySetupChildDraft {
+function withChildDerivedFields(
+  child: FamilySetupChildDraft,
+  children: FamilySetupChildDraft[],
+  targetIndex: number,
+): FamilySetupChildDraft {
   const chores = parseChores(child.choresInput);
 
   if (child.accountMode === 'username') {
+    const nextUsername = child.username.trim()
+      ? child.username
+      : suggestUniqueUsername(children, targetIndex, child);
+
     return {
       ...child,
       email: '',
+      username: nextUsername,
       starterPassword: child.lastName.trim() ? suggestStarterPassword(child.lastName) : '',
       chores,
     };
@@ -471,7 +517,9 @@ export default function FamilySetup() {
                         updateDraft((currentDraft) => ({
                           ...currentDraft,
                           children: currentDraft.children.map((currentChild, childIndex) =>
-                            childIndex === index ? withChildDerivedFields(nextChild) : currentChild,
+                            childIndex === index
+                              ? withChildDerivedFields(nextChild, currentDraft.children, index)
+                              : currentChild,
                           ),
                         }))
                       }

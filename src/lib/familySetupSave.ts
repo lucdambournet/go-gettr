@@ -50,6 +50,7 @@ export async function createFamilyFromDraft({
         first_name: child.firstName,
         last_name: child.lastName,
         email: child.username.trim(),
+        birthdate: child.birthdate,
         role: 'child',
         family_id: family.id,
       });
