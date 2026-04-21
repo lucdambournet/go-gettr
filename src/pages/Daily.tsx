@@ -27,12 +27,6 @@ function getTodayChores(chores: Chore[], today: Date): Chore[] {
   });
 }
 
-function getExpectedCompletions(chore: Chore): number {
-  const freq = chore.frequency || "weekly";
-  if (freq === "twice_daily" || freq.startsWith("2x:")) return 2;
-  return 1;
-}
-
 function CompletionBurst({ x, y }: { x: number; y: number }) {
   const colors = ["#f59e0b", "#6366f1", "#10b981", "#ec4899", "#f97316", "#06b6d4"];
   return (
@@ -261,11 +255,10 @@ interface PersonSectionProps {
   chores: Chore[];
   logMap: Record<string, ChoreLog | boolean | null>;
   onToggle: (chore: Chore, personId: string, dayStr: string) => void;
-  weekStartStr: string;
   todayStr: string;
 }
 
-function PersonSection({ person, personIndex, chores, logMap, onToggle, weekStartStr, todayStr }: PersonSectionProps) {
+function PersonSection({ person, personIndex, chores, logMap, onToggle, todayStr }: PersonSectionProps) {
   const today = new Date();
   const todayChores = getTodayChores(chores, today);
   const completed = todayChores.filter((c) => logMap[`${c.id}_${todayStr}`]);
@@ -576,7 +569,6 @@ export default function Daily() {
               chores={activeChores.filter((c: Chore) => c.assigned_to === person.id)}
               logMap={logMap}
               onToggle={handleToggle}
-              weekStartStr={weekStartStr}
               todayStr={todayStr}
             />
           ))}

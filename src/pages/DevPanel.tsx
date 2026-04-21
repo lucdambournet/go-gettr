@@ -76,19 +76,12 @@ export default function DevPanel() {
   const createStreak = useMutation({
     mutationFn: (data) => entities.Streak.create(data),
   });
-  const createPayout = useMutation({
-    mutationFn: (data) => entities.Payout.create(data),
-  });
   const deleteChoreLog = useMutation({
     mutationFn: (id) => entities.ChoreLog.delete(id),
   });
   const deletePayout = useMutation({
     mutationFn: (id) => entities.Payout.delete(id),
   });
-  const deleteStreak = useMutation({
-    mutationFn: (id) => entities.Streak.delete(id),
-  });
-
   const invalidateAll = () => {
     queryClient.invalidateQueries({ queryKey: ["streaks"] });
     queryClient.invalidateQueries({ queryKey: ["payouts"] });

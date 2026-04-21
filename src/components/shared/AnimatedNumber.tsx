@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { useMemo } from "react";
 
 interface AnimatedNumberProps {
   value: number | undefined | null;

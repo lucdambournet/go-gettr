@@ -3,6 +3,8 @@ import pluginJs from "@eslint/js";
 import pluginReact from "eslint-plugin-react";
 import pluginReactHooks from "eslint-plugin-react-hooks";
 import pluginUnusedImports from "eslint-plugin-unused-imports";
+import tsParser from "@typescript-eslint/parser";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
 
 export default [
   {
@@ -19,6 +21,7 @@ export default [
     ...pluginJs.configs.recommended,
     ...pluginReact.configs.flat.recommended,
     languageOptions: {
+      parser: tsParser,
       globals: globals.browser,
       parserOptions: {
         ecmaVersion: 2022,
@@ -26,6 +29,7 @@ export default [
         ecmaFeatures: {
           jsx: true,
         },
+        project: "./tsconfig.json",
       },
     },
     settings: {
@@ -37,9 +41,11 @@ export default [
       react: pluginReact,
       "react-hooks": pluginReactHooks,
       "unused-imports": pluginUnusedImports,
+      "@typescript-eslint": tsPlugin,
     },
     rules: {
       "no-unused-vars": "off",
+      "no-undef": "off",
       "react/jsx-uses-vars": "error",
       "react/jsx-uses-react": "error",
       "unused-imports/no-unused-imports": "error",

@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { Sun, Repeat2, RotateCcw } from "lucide-react";
+import { Repeat2 } from "lucide-react";
 
 const DAYS = [
   { key: "mon", label: "M",  full: "Monday" },
@@ -61,8 +61,6 @@ export default function DaySelector({ value, onChange }: DaySelectorProps) {
     if (preset === "weekend") onChange(serializeDays(["sat","sun"], twice));
     if (preset === "none") onChange("weekly");
   };
-
-  const allSelected = selected.length === 7;
 
   const summaryText = () => {
     if (selected.length === 0) return "No days selected";

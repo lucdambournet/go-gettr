@@ -4,7 +4,7 @@ import { type Profile, type Chore, type ChoreLog, type Streak } from "@/types/en
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Users, ListChecks, DollarSign, TrendingUp, Trophy, ArrowRight, Flame, Bell, BellOff } from "lucide-react";
+import { Users, ListChecks, DollarSign, TrendingUp, ArrowRight, Flame, Bell, BellOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PersonAvatar from "@/components/shared/PersonAvatar";
 import { getWeekStart, getWeekDays, formatDate, formatWeekLabel, choreWeekStats } from "@/components/shared/weekUtils";
@@ -196,7 +196,7 @@ export default function Dashboard() {
         { body: `${names} still ${pendingToday.length === 1 ? "has" : "have"} chores to complete.` }
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [notifEnabled, streaks.length, people.length]);
 
   const handleToggleNotifications = async () => {

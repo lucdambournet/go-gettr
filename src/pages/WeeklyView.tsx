@@ -164,10 +164,9 @@ interface PersonSectionProps {
   logMap: LogMap;
   optimistic: LogMap;
   onToggle: (choreId: string, personId: string, dayStr: string) => void;
-  weekStartStr: string;
 }
 
-function PersonSection({ person, personIndex, chores, weekDays, logMap, optimistic, onToggle, weekStartStr }: PersonSectionProps) {
+function PersonSection({ person, personIndex, chores, weekDays, logMap, optimistic, onToggle }: PersonSectionProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   const effectiveLogMap = useMemo(() => {
@@ -460,7 +459,6 @@ export default function WeeklyView() {
                       logMap={logMap}
                       optimistic={effectiveOptimistic}
                       onToggle={handleToggle}
-                      weekStartStr={weekStartStr}
                     />
                   ))
                 )}

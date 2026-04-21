@@ -556,7 +556,7 @@ export default function Settings() {
             </div>
 
             <div className="grid grid-cols-4 gap-2">
-              {CURRENCIES.map(({ code, symbol, label }) => {
+              {CURRENCIES.map(({ code, symbol }) => {
                 const isActive = prefs.currency === code;
                 return (
                   <motion.button key={code} type="button"

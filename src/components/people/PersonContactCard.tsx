@@ -2,29 +2,12 @@ import { useState } from "react";
 import { type Profile, type Chore, type Streak } from "@/types/entities";
 import { type WeekStats } from "@/components/shared/weekUtils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pencil, Trash2, DollarSign, ListChecks, Flame, Calendar, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
+import { Pencil, Trash2, ListChecks, Flame, TrendingUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { getAvatarStyle } from "@/components/people/colorUtils";
-
-// Rank icon SVG components instead of emojis
-function RankBadge({ rank }: { rank: number }) {
-  const colors: Record<number, { bg: string; ring: string; label: string }> = {
-    1: { bg: "#FFD700", ring: "#B8860B", label: "1" },
-    2: { bg: "#C0C0C0", ring: "#808080", label: "2" },
-    3: { bg: "#CD7F32", ring: "#8B4513", label: "3" },
-  };
-  const c = colors[rank];
-  if (!c) return <span className="text-xs font-black text-muted-foreground">{rank}.</span>;
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <circle cx="9" cy="9" r="8.5" fill={c.bg} stroke={c.ring} strokeWidth="1"/>
-      <text x="9" y="13" textAnchor="middle" fontSize="9" fontWeight="bold" fill={c.ring}>{c.label}</text>
-    </svg>
-  );
-}
 
 interface PersonContactCardProps {
   person: Profile;
