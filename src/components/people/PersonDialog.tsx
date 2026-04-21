@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ColorPicker from "@/components/people/ColorPicker";
 import { getAvatarStyle } from "@/components/people/colorUtils";
 import { Shield, User, Bell, DollarSign, Star } from "lucide-react";
-import { type Person } from "@/types/entities";
+import { type Profile } from "@/types/entities";
 import { cn } from "@/lib/utils";
 
 const STAGGER_DELAY = 0.06;
@@ -29,44 +29,52 @@ function FormField({ label, children, index = 0 }: { label: string; children: Re
 interface PersonDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  person?: Person | null;
-  onSave: (data: Partial<Person>) => void;
+  person?: Profile | null;
+  onSave: (data: Partial<Profile>) => void;
   isSaving?: boolean;
 }
 
 export default function PersonDialog({ open, onOpenChange, person, onSave, isSaving }: PersonDialogProps) {
   const isEdit = !!person;
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [allowance, setAllowance] = useState("");
   const [color, setColor] = useState("#6d5bd0");
-  const [isParent, setIsParent] = useState(false);
-  // Parent-specific settings
+  const [role, setRole] = useState<'parent' | 'child'>('child');
   const [notifyOnRequest, setNotifyOnRequest] = useState(true);
   const [maxPayout, setMaxPayout] = useState("");
 
   useEffect(() => {
     if (open) {
-      setName(person?.name || "");
+      setFirstName(person?.first_name || "");
+      setLastName(person?.last_name || "");
       setAllowance(person?.weekly_allowance != null ? String(person.weekly_allowance) : "");
       const style = getAvatarStyle(person?.avatar_color);
       setColor(style.hex);
-      setIsParent(person?.is_parent || false);
+      setRole(person?.role ?? 'child');
       setNotifyOnRequest(person?.notify_on_payout_request !== false);
       setMaxPayout(person?.max_single_payout != null ? String(person.max_single_payout) : "");
     }
   }, [open, person]);
 
   const handleSave = () => {
-    if (!name.trim()) return;
-    const base = { name: name.trim(), avatar_color: color, active: true, is_parent: isParent };
-    if (isParent) {
+    if (!firstName.trim()) return;
+    const base: Partial<Profile> = {
+      first_name: firstName.trim(),
+      last_name: lastName.trim(),
+      avatar_color: color,
+      active: true,
+      role,
+    };
+    if (role === 'parent') {
       onSave({ ...base, notify_on_payout_request: notifyOnRequest, max_single_payout: parseFloat(maxPayout) || null, weekly_allowance: 0 });
     } else {
       onSave({ ...base, weekly_allowance: parseFloat(allowance) || 0 });
     }
   };
 
-  const initial = (name || "?")[0].toUpperCase();
+  const initial = (firstName || "?")[0].toUpperCase();
+  const isParent = role === 'parent';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -76,7 +84,7 @@ export default function PersonDialog({ open, onOpenChange, person, onSave, isSav
         </DialogHeader>
 
         <div className="space-y-5 pt-2">
-          {/* Avatar preview with ring + glow */}
+          {/* Avatar preview */}
           <motion.div
             initial={{ opacity: 0, scale: 0.6, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -100,7 +108,6 @@ export default function PersonDialog({ open, onOpenChange, person, onSave, isSav
                   {initial}
                 </motion.div>
               </motion.div>
-              {/* Role badge */}
               <motion.div
                 key={String(isParent)}
                 initial={{ scale: 0 }}
@@ -116,43 +123,45 @@ export default function PersonDialog({ open, onOpenChange, person, onSave, isSav
             </div>
           </motion.div>
 
-          <FormField label="Name" index={0}>
-            <motion.div whileFocus={{ scale: 1.01 }}>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter name" autoFocus={!isEdit} />
-            </motion.div>
-          </FormField>
+          <div className="grid grid-cols-2 gap-3">
+            <FormField label="First name" index={0}>
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jane" autoFocus={!isEdit} />
+            </FormField>
+            <FormField label="Last name" index={1}>
+              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Smith" />
+            </FormField>
+          </div>
 
-          <FormField label="Avatar Color" index={1}>
+          <FormField label="Avatar Color" index={2}>
             <ColorPicker value={color} onChange={setColor} />
           </FormField>
 
-          {/* Role selector */}
-          <FormField label="Role" index={2}>
+          <FormField label="Role" index={3}>
             <div className="grid grid-cols-2 gap-2">
-              {[
-                { value: false, icon: User,   label: "Child",  desc: "Earns rewards & allowance", gradient: "from-primary/10 to-primary/5" },
-                { value: true,  icon: Shield, label: "Parent", desc: "Approves payouts & manages",  gradient: "from-amber-500/10 to-amber-500/5" },
-              ].map(({ value, icon: Icon, label, desc, gradient }) => (
+              {([
+                { value: 'child' as const,  icon: User,   label: "Child",  desc: "Earns rewards & allowance", gradient: "from-primary/10 to-primary/5" },
+                { value: 'parent' as const, icon: Shield, label: "Parent", desc: "Approves payouts & manages",  gradient: "from-amber-500/10 to-amber-500/5" },
+              ]).map(({ value, icon: Icon, label, desc, gradient }) => (
                 <motion.button
-                  key={String(value)}
+                  key={value}
                   type="button"
                   whileHover={{ scale: 1.03, y: -2 }}
                   whileTap={{ scale: 0.97 }}
                   transition={{ type: "spring", stiffness: 360, damping: 22 }}
-                  onClick={() => setIsParent(value)}
+                  onClick={() => setRole(value)}
                   className={cn(
                     "flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all",
-                    isParent === value
-                      ? value ? "border-amber-500 bg-gradient-to-br " + gradient : "border-primary bg-gradient-to-br " + gradient
+                    role === value
+                      ? value === 'parent' ? "border-amber-500 bg-gradient-to-br " + gradient : "border-primary bg-gradient-to-br " + gradient
                       : "border-border hover:border-primary/40 bg-card"
                   )}
                 >
                   <motion.div
-                    animate={isParent === value ? { rotate: [0, -10, 10, 0], scale: [1, 1.2, 1] } : {}}
+                    animate={role === value ? { rotate: [0, -10, 10, 0], scale: [1, 1.2, 1] } : {}}
                     transition={{ duration: 0.4 }}
                     className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0",
-                      isParent === value
-                        ? value ? "bg-amber-500 text-white shadow-lg shadow-amber-500/30" : "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
+                      role === value
+                        ? value === 'parent' ? "bg-amber-500 text-white shadow-lg shadow-amber-500/30" : "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
                         : "bg-secondary text-muted-foreground"
                     )}
                   >
@@ -167,7 +176,6 @@ export default function PersonDialog({ open, onOpenChange, person, onSave, isSav
             </div>
           </FormField>
 
-          {/* Animated role-specific settings */}
           <AnimatePresence mode="wait">
             {!isParent ? (
               <motion.div
@@ -209,7 +217,6 @@ export default function PersonDialog({ open, onOpenChange, person, onSave, isSav
                     <Shield className="w-3.5 h-3.5" /> Parent Settings
                   </div>
 
-                  {/* Notify on payout toggle */}
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5 flex-1">
                       <Bell className="w-4 h-4 text-amber-500 shrink-0" />
@@ -235,7 +242,6 @@ export default function PersonDialog({ open, onOpenChange, person, onSave, isSav
                     </motion.button>
                   </div>
 
-                  {/* Max single payout */}
                   <div className="space-y-1.5">
                     <Label className="flex items-center gap-2 text-xs">
                       <DollarSign className="w-3.5 h-3.5 text-amber-500" /> Max single payout ($)
@@ -267,7 +273,7 @@ export default function PersonDialog({ open, onOpenChange, person, onSave, isSav
           >
             <Button
               onClick={handleSave}
-              disabled={!name.trim() || isSaving}
+              disabled={!firstName.trim() || isSaving}
               className={cn(
                 "w-full h-11 font-bold text-base rounded-xl",
                 isParent && "bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-white shadow-lg shadow-amber-500/20 border-0"

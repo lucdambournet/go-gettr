@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { entities } from "@/api/entities";
-import { type Person, type Chore, type ChoreLog, type Streak } from "@/types/entities";
+import { type Profile, type Chore, type ChoreLog, type Streak } from "@/types/entities";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -157,17 +157,16 @@ function ChoreRow({ chore, weekDays, logMap, optimistic, onToggle, personId }: C
 }
 
 interface PersonSectionProps {
-  person: Person;
+  person: Profile;
   personIndex: number;
   chores: Chore[];
   weekDays: Date[];
   logMap: LogMap;
   optimistic: LogMap;
   onToggle: (choreId: string, personId: string, dayStr: string) => void;
-  weekStartStr: string;
 }
 
-function PersonSection({ person, personIndex, chores, weekDays, logMap, optimistic, onToggle, weekStartStr }: PersonSectionProps) {
+function PersonSection({ person, personIndex, chores, weekDays, logMap, optimistic, onToggle }: PersonSectionProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   const effectiveLogMap = useMemo(() => {
@@ -320,7 +319,7 @@ export default function WeeklyView() {
   const weekStartStr = formatDate(weekStart);
   const queryClient = useQueryClient();
 
-  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Person.list() as Promise<Person[]> });
+  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
   const { data: chores = [] } = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
   const { data: streaks = [] } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list() as Promise<Streak[]> });
   const { data: logs = [], isLoading } = useQuery({
@@ -345,9 +344,9 @@ export default function WeeklyView() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["streaks"] }),
   });
 
-  const streakMap = useMemo(() => Object.fromEntries(streaks.map((s: Streak) => [s.person_id, s])), [streaks]);
+  const streakMap = useMemo(() => Object.fromEntries(streaks.map((s: Streak) => [s.profile_id, s])), [streaks]);
 
-  const activePeople = people.filter((p: Person) => p.active !== false && !p.is_parent);
+  const activePeople = people.filter((p: Profile) => p.active !== false && !p.is_parent);
   const activeChores = chores.filter((c: Chore) => c.active !== false);
 
   const logMap = useMemo(() => {
@@ -375,7 +374,7 @@ export default function WeeklyView() {
       }
     } else {
       setOptimistic((prev) => ({ ...prev, [key]: true }));
-      createLogMutation.mutate({ chore_id: choreId, person_id: personId, week_start: weekStartStr, day: dayStr, completed: true }, {
+      createLogMutation.mutate({ chore_id: choreId, profile_id: personId, week_start: weekStartStr, day: dayStr, completed: true }, {
         onSettled: () => setOptimistic((prev) => { const n = { ...prev }; delete n[key]; return n; }),
       });
       if ((chore?.payout_per_completion ?? 0) > 0) {
@@ -383,7 +382,7 @@ export default function WeeklyView() {
         if (streak) {
           updateStreakMutation.mutate({ id: streak.id, data: { total_rewards_earned: (streak.total_rewards_earned || 0) + (chore?.payout_per_completion ?? 0) } });
         } else {
-          createStreakMutation.mutate({ person_id: personId, current_streak: 0, longest_streak: 0, last_checkin_date: null, total_rewards_earned: chore?.payout_per_completion ?? 0 });
+          createStreakMutation.mutate({ profile_id: personId, current_streak: 0, longest_streak: 0, last_checkin_date: null, total_rewards_earned: chore?.payout_per_completion ?? 0 });
         }
       }
     }
@@ -450,7 +449,7 @@ export default function WeeklyView() {
                       className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
                   </div>
                 ) : (
-                  activePeople.map((person: Person, pi: number) => (
+                  activePeople.map((person: Profile, pi: number) => (
                     <PersonSection
                       key={person.id}
                       person={person}
@@ -460,7 +459,6 @@ export default function WeeklyView() {
                       logMap={logMap}
                       optimistic={effectiveOptimistic}
                       onToggle={handleToggle}
-                      weekStartStr={weekStartStr}
                     />
                   ))
                 )}

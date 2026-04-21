@@ -1,10 +1,10 @@
 import { useMemo, useEffect, useState, type ElementType } from "react";
 import { entities } from "@/api/entities";
-import { type Person, type Chore, type ChoreLog, type Streak } from "@/types/entities";
+import { type Profile, type Chore, type ChoreLog, type Streak } from "@/types/entities";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Users, ListChecks, DollarSign, TrendingUp, Trophy, ArrowRight, Flame, Bell, BellOff } from "lucide-react";
+import { Users, ListChecks, DollarSign, TrendingUp, ArrowRight, Flame, Bell, BellOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PersonAvatar from "@/components/shared/PersonAvatar";
 import { getWeekStart, getWeekDays, formatDate, formatWeekLabel, choreWeekStats } from "@/components/shared/weekUtils";
@@ -99,7 +99,7 @@ export default function Dashboard() {
   const { requestPermission, sendNotification, permission } = useNotifications();
   const [notifEnabled, setNotifEnabled] = useState(permission === "granted");
 
-  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Person.list() as Promise<Person[]> });
+  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
   const { data: chores = [] } = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
   const { data: logs = [] } = useQuery({
     queryKey: ["choreLogs", weekStartStr],
@@ -116,7 +116,7 @@ export default function Dashboard() {
     return map;
   }, [logs]);
 
-  const streakMap = useMemo(() => Object.fromEntries(streaks.map((s) => [s.person_id, s])), [streaks]);
+  const streakMap = useMemo(() => Object.fromEntries(streaks.map((s) => [s.profile_id, s])), [streaks]);
 
   // Today's progress per person (used for progress bars)
   const stats = useMemo(() => {
@@ -196,7 +196,7 @@ export default function Dashboard() {
         { body: `${names} still ${pendingToday.length === 1 ? "has" : "have"} chores to complete.` }
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [notifEnabled, streaks.length, people.length]);
 
   const handleToggleNotifications = async () => {

@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from "react";
 import { entities } from "@/api/entities";
-import { type Person, type Chore, type ChoreLog, type Streak } from "@/types/entities";
+import { type Profile, type Chore, type ChoreLog, type Streak } from "@/types/entities";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,12 +25,6 @@ function getTodayChores(chores: Chore[], today: Date): Chore[] {
     const raw = freq.startsWith("2x:") ? freq.slice(3) : freq;
     return raw.split(",").map(d => d.trim()).includes(todayKey);
   });
-}
-
-function getExpectedCompletions(chore: Chore): number {
-  const freq = chore.frequency || "weekly";
-  if (freq === "twice_daily" || freq.startsWith("2x:")) return 2;
-  return 1;
 }
 
 function CompletionBurst({ x, y }: { x: number; y: number }) {
@@ -256,16 +250,15 @@ function ChoreCard({ chore, isCompleted, onToggle, personName, personColor, pers
 const PERSON_COLORS = ["#6366f1", "#f59e0b", "#ec4899", "#06b6d4", "#8b5cf6", "#10b981"];
 
 interface PersonSectionProps {
-  person: Person;
+  person: Profile;
   personIndex: number;
   chores: Chore[];
   logMap: Record<string, ChoreLog | boolean | null>;
   onToggle: (chore: Chore, personId: string, dayStr: string) => void;
-  weekStartStr: string;
   todayStr: string;
 }
 
-function PersonSection({ person, personIndex, chores, logMap, onToggle, weekStartStr, todayStr }: PersonSectionProps) {
+function PersonSection({ person, personIndex, chores, logMap, onToggle, todayStr }: PersonSectionProps) {
   const today = new Date();
   const todayChores = getTodayChores(chores, today);
   const completed = todayChores.filter((c) => logMap[`${c.id}_${todayStr}`]);
@@ -399,7 +392,7 @@ export default function Daily() {
   const weekStartStr = formatDate(weekStart);
   const todayStr = formatDate(today);
 
-  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Person.list() as Promise<Person[]> });
+  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
   const { data: chores = [] } = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
   const { data: logs = [] } = useQuery({
     queryKey: ["choreLogs", weekStartStr],
@@ -407,7 +400,7 @@ export default function Daily() {
   });
   const { data: streaks = [] } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list() as Promise<Streak[]> });
 
-  const streakMap = useMemo(() => Object.fromEntries(streaks.map((s: Streak) => [s.person_id, s])), [streaks]);
+  const streakMap = useMemo(() => Object.fromEntries(streaks.map((s: Streak) => [s.profile_id, s])), [streaks]);
 
   const createLogMutation = useMutation({
     mutationFn: (data: Partial<ChoreLog>) => entities.ChoreLog.create(data) as Promise<ChoreLog>,
@@ -426,7 +419,7 @@ export default function Daily() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["streaks"] }),
   });
 
-  const activePeople = people.filter((p: Person) => p.active !== false && !p.is_parent);
+  const activePeople = people.filter((p: Profile) => p.active !== false && !p.is_parent);
   const activeChores = chores.filter((c: Chore) => c.active !== false);
 
   const serverLogMap = useMemo(() => {
@@ -463,7 +456,7 @@ export default function Daily() {
     } else {
       setOptimistic(prev => ({ ...prev, [key]: true }));
       createLogMutation.mutate(
-        { chore_id: chore.id, person_id: personId, week_start: weekStartStr, day: dayStr, completed: true },
+        { chore_id: chore.id, profile_id: personId, week_start: weekStartStr, day: dayStr, completed: true },
         { onSettled: () => setOptimistic(prev => { const n = { ...prev }; delete n[key]; return n; }) }
       );
       if ((chore.payout_per_completion ?? 0) > 0) {
@@ -471,7 +464,7 @@ export default function Daily() {
         if (streak) {
           updateStreakMutation.mutate({ id: streak.id, data: { total_rewards_earned: (streak.total_rewards_earned || 0) + (chore.payout_per_completion ?? 0) } });
         } else {
-          createStreakMutation.mutate({ person_id: personId, current_streak: 0, longest_streak: 0, last_checkin_date: null, total_rewards_earned: chore.payout_per_completion ?? 0 });
+          createStreakMutation.mutate({ profile_id: personId, current_streak: 0, longest_streak: 0, last_checkin_date: null, total_rewards_earned: chore.payout_per_completion ?? 0 });
         }
       }
     }
@@ -479,7 +472,7 @@ export default function Daily() {
 
   const todayStats = useMemo(() => {
     let total = 0, done = 0;
-    activePeople.forEach((person: Person) => {
+    activePeople.forEach((person: Profile) => {
       const pChores = activeChores.filter((c: Chore) => c.assigned_to === person.id);
       const tChores = getTodayChores(pChores, today);
       total += tChores.length;
@@ -568,7 +561,7 @@ export default function Daily() {
         </motion.div>
       ) : (
         <div className="space-y-8">
-          {activePeople.map((person: Person, i: number) => (
+          {activePeople.map((person: Profile, i: number) => (
             <PersonSection
               key={person.id}
               person={person}
@@ -576,7 +569,6 @@ export default function Daily() {
               chores={activeChores.filter((c: Chore) => c.assigned_to === person.id)}
               logMap={logMap}
               onToggle={handleToggle}
-              weekStartStr={weekStartStr}
               todayStr={todayStr}
             />
           ))}

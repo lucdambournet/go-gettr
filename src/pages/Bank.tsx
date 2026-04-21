@@ -4,10 +4,10 @@ import { createPortal } from "react-dom";
 import { entities } from "@/api/entities";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Clock, Sparkles, TrendingUp, Coins, ShieldCheck, AlertCircle } from "lucide-react";
+import { CheckCircle2, Clock, TrendingUp, Coins, ShieldCheck, AlertCircle } from "lucide-react";
 import PersonAvatar from "@/components/shared/PersonAvatar";
 import AnimatedNumber from "@/components/shared/AnimatedNumber";
 import { formatDate } from "@/components/shared/weekUtils";
@@ -194,32 +194,6 @@ function FlyingPiece({ denom, originRect, index, onDone }) {
       {denom.isNote ? <BillGraphic denom={denom} /> : <CoinGraphic denom={denom} />}
     </div>,
     document.body
-  );
-}
-
-// Static display piece (not animating)
-function CurrencyPiece({ denom, index }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.5, y: 10 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.7, y: -8 }}
-      transition={{ delay: index * 0.055, type: "spring", stiffness: 240, damping: 18 }}
-      whileHover={{ y: -5, scale: 1.1 }}
-      className="relative cursor-default select-none"
-    >
-      {denom.isNote ? <BillGraphic denom={denom} /> : <CoinGraphic denom={denom} />}
-      {denom.count > 1 && (
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: index * 0.055 + 0.18, type: "spring", stiffness: 400 }}
-          className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground rounded-full text-[9px] font-black flex items-center justify-center shadow"
-        >
-          {denom.count}
-        </motion.div>
-      )}
-    </motion.div>
   );
 }
 
@@ -439,7 +413,7 @@ function PayoutRow({ payout, child, onMarkPaid, isMarkingPaid, index }) {
 
 function ParentCard({ person, personIndex, pendingPayouts, onMarkPaid, isMarkingPaid, allPeople }) {
   const myPending = pendingPayouts.filter(p => {
-    const child = allPeople.find(x => x.id === p.person_id);
+    const child = allPeople.find(x => x.id === p.profile_id);
     return child && !child.is_parent;
   });
   const totalPending = myPending.reduce((s, p) => s + p.amount, 0);
@@ -522,7 +496,7 @@ function ParentCard({ person, personIndex, pendingPayouts, onMarkPaid, isMarking
                   Pending Approvals
                 </motion.div>
                 {myPending.map((payout, i) => {
-                  const child = allPeople.find(x => x.id === payout.person_id);
+                  const child = allPeople.find(x => x.id === payout.profile_id);
                   if (!child) return null;
                   return (
                     <PayoutRow
@@ -622,7 +596,7 @@ export default function Bank() {
   // burstState: { personId, pieces } | null
   const [burstState, setBurstState] = useState(null);
 
-  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Person.list() });
+  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() });
   const { data: streaks = [] } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list(), refetchInterval: 1000 });
   const { data: payouts = [] } = useQuery({ queryKey: ["payouts"], queryFn: () => entities.Payout.list(), refetchInterval: 1000 });
 
@@ -638,12 +612,12 @@ export default function Bank() {
   const activePeople = people.filter(p => p.active !== false);
   const kids = activePeople.filter(p => !p.is_parent);
   const parents = activePeople.filter(p => p.is_parent);
-  const streakMap = useMemo(() => Object.fromEntries(streaks.map(s => [s.person_id, s])), [streaks]);
+  const streakMap = useMemo(() => Object.fromEntries(streaks.map(s => [s.profile_id, s])), [streaks]);
 
   const getKidFinancials = (person) => {
     const earned = streakMap[person.id]?.total_rewards_earned || 0;
-    const paid = payouts.filter(p => p.person_id === person.id && p.status === "paid").reduce((s, p) => s + p.amount, 0);
-    const pending = payouts.filter(p => p.person_id === person.id && p.status === "pending").reduce((s, p) => s + p.amount, 0);
+    const paid = payouts.filter(p => p.profile_id === person.id && p.status === "paid").reduce((s, p) => s + p.amount, 0);
+    const pending = payouts.filter(p => p.profile_id === person.id && p.status === "pending").reduce((s, p) => s + p.amount, 0);
     const available = Math.max(0, earned - paid - pending);
     return { earned, paid, pending, available };
   };
@@ -655,7 +629,7 @@ export default function Bank() {
     const pieces = breakIntoNotes(amount);
     setBurstState({ personId: person.id, pieces });
     await createPayoutMutation.mutateAsync({
-      person_id: person.id, amount, status: "pending",
+      profile_id: person.id, amount, status: "pending",
       requested_date: formatDate(new Date()),
     });
   };

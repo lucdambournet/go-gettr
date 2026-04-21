@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import { useState } from "react";
 import { entities } from "@/api/entities";
-import { type Person, type Chore, type ChoreLog, type Streak } from "@/types/entities";
+import { type Profile, type Chore, type ChoreLog, type Streak } from "@/types/entities";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Plus, Users, UserPlus } from "lucide-react";
 import EmptyState from "@/components/shared/EmptyState";
@@ -12,15 +13,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getWeekStart, getWeekDays, formatDate, choreWeekStats } from "@/components/shared/weekUtils";
 
 export default function People() {
+  const { isParent, family } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
-  const [editPerson, setEditPerson] = useState<Person | null>(null);
+  const [editProfile, setEditProfile] = useState<Profile | null>(null);
   const queryClient = useQueryClient();
 
   const weekStart = getWeekStart();
   const weekDays = getWeekDays(weekStart);
   const weekStartStr = formatDate(weekStart);
 
-  const { data: people = [], isLoading } = useQuery({ queryKey: ["people"], queryFn: () => entities.Person.list() as Promise<Person[]> });
+  const { data: people = [], isLoading } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
   const { data: chores = [] } = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
   const { data: logs = [] } = useQuery({
     queryKey: ["choreLogs", weekStartStr],
@@ -29,15 +31,15 @@ export default function People() {
   const { data: streaks = [] } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list() as Promise<Streak[]> });
 
   const createMutation = useMutation({
-    mutationFn: (data: Partial<Person>) => entities.Person.create(data) as Promise<Person>,
+    mutationFn: (data: Partial<Profile>) => entities.Profile.create({ ...data, family_id: family?.id }) as unknown as Promise<Profile>,
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["people"] }); setAddOpen(false); },
   });
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Person> }) => entities.Person.update(id, data) as Promise<Person>,
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["people"] }); setEditPerson(null); },
+    mutationFn: ({ id, data }: { id: string; data: Partial<Profile> }) => entities.Profile.update(id, data) as unknown as Promise<Profile>,
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["people"] }); setEditProfile(null); },
   });
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => entities.Person.delete(id) as unknown as Promise<void>,
+    mutationFn: (id: string) => entities.Profile.delete(id) as unknown as Promise<void>,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["people"] }),
   });
 
@@ -50,7 +52,7 @@ export default function People() {
     return map;
   }, [logs]);
 
-  const streakMap = useMemo(() => Object.fromEntries(streaks.map((s) => [s.person_id, s])), [streaks]);
+  const streakMap = useMemo(() => Object.fromEntries(streaks.map((s) => [s.profile_id, s])), [streaks]);
 
   // Compute per-person weekly stats
   const weeklyStatsMap = useMemo(() => {
@@ -91,22 +93,28 @@ export default function People() {
                 {activePeople.length} member{activePeople.length !== 1 ? "s" : ""} in your group
               </p>
             </div>
-            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.94 }}>
-              <Button className="gap-2 rounded-xl shadow-lg shadow-primary/20 font-semibold h-10" onClick={() => setAddOpen(true)}>
-                <motion.span animate={addOpen ? { rotate: 45 } : { rotate: 0 }} transition={{ type: "spring", stiffness: 300 }} className="flex">
-                  <Plus className="w-4 h-4" />
-                </motion.span>
-                Add Person
-              </Button>
-            </motion.div>
+            {isParent && (
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.94 }}>
+                <Button className="gap-2 rounded-xl shadow-lg shadow-primary/20 font-semibold h-10" onClick={() => setAddOpen(true)}>
+                  <motion.span animate={addOpen ? { rotate: 45 } : { rotate: 0 }} transition={{ type: "spring", stiffness: 300 }} className="flex">
+                    <Plus className="w-4 h-4" />
+                  </motion.span>
+                  Add Person
+                </Button>
+              </motion.div>
+            )}
           </div>
         </div>
       </motion.div>
 
-      <PersonDialog open={addOpen} onOpenChange={setAddOpen} person={null}
-        onSave={(data) => createMutation.mutate(data)} isSaving={createMutation.isPending} />
-      <PersonDialog open={!!editPerson} onOpenChange={(v) => !v && setEditPerson(null)} person={editPerson}
-        onSave={(data) => editPerson && updateMutation.mutate({ id: editPerson.id, data })} isSaving={updateMutation.isPending} />
+      {isParent && (
+        <>
+          <PersonDialog open={addOpen} onOpenChange={setAddOpen} person={null}
+            onSave={(data) => createMutation.mutate(data)} isSaving={createMutation.isPending} />
+          <PersonDialog open={!!editProfile} onOpenChange={(v) => !v && setEditProfile(null)} person={editProfile}
+            onSave={(data) => editProfile && updateMutation.mutate({ id: editProfile.id, data })} isSaving={updateMutation.isPending} />
+        </>
+      )}
 
       <AnimatePresence mode="popLayout">
         {activePeople.length === 0 ? (
@@ -116,11 +124,11 @@ export default function People() {
               icon={Users}
               title="No people yet"
               description="Add people to your group to start assigning chores."
-              action={
+              action={isParent ? (
                 <Button className="gap-2 mt-2" onClick={() => setAddOpen(true)}>
                   <UserPlus className="w-4 h-4" /> Add your first person
                 </Button>
-              }
+              ) : undefined}
             />
           </motion.div>
         ) : (
@@ -133,9 +141,8 @@ export default function People() {
                   person={person}
                   index={i}
                   chores={activeChores.filter((c) => c.assigned_to === person.id)}
-                  onEdit={() => setEditPerson(person)}
-                  onDelete={() => deleteMutation.mutate(person.id)}
-                  isDeleting={deleteMutation.isPending}
+                  onEdit={isParent ? () => setEditProfile(person) : undefined}
+                  onDelete={isParent ? () => deleteMutation.mutate(person.id) : undefined}
                   weeklyStats={weeklyStatsMap[person.id]}
                   streakData={streakMap[person.id] ?? null}
                 />

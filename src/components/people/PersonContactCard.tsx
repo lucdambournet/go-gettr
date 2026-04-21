@@ -1,37 +1,20 @@
 import { useState } from "react";
-import { type Person, type Chore, type Streak } from "@/types/entities";
+import { type Profile, type Chore, type Streak } from "@/types/entities";
 import { type WeekStats } from "@/components/shared/weekUtils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pencil, Trash2, DollarSign, ListChecks, Flame, Calendar, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
+import { Pencil, Trash2, ListChecks, Flame, TrendingUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { getAvatarStyle } from "@/components/people/colorUtils";
 
-// Rank icon SVG components instead of emojis
-function RankBadge({ rank }: { rank: number }) {
-  const colors: Record<number, { bg: string; ring: string; label: string }> = {
-    1: { bg: "#FFD700", ring: "#B8860B", label: "1" },
-    2: { bg: "#C0C0C0", ring: "#808080", label: "2" },
-    3: { bg: "#CD7F32", ring: "#8B4513", label: "3" },
-  };
-  const c = colors[rank];
-  if (!c) return <span className="text-xs font-black text-muted-foreground">{rank}.</span>;
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <circle cx="9" cy="9" r="8.5" fill={c.bg} stroke={c.ring} strokeWidth="1"/>
-      <text x="9" y="13" textAnchor="middle" fontSize="9" fontWeight="bold" fill={c.ring}>{c.label}</text>
-    </svg>
-  );
-}
-
 interface PersonContactCardProps {
-  person: Person;
+  person: Profile;
   index: number;
   chores: Chore[];
-  onEdit: () => void;
-  onDelete: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
   weeklyStats?: WeekStats | null;
   streakData?: Streak | null;
 }
@@ -180,23 +163,28 @@ export default function PersonContactCard({ person, index, chores, onEdit, onDel
           )}
         </AnimatePresence>
 
-        {/* Action buttons */}
-        <div className="flex gap-2 mt-4">
-          <Button
-            size="sm" variant="outline"
-            className="flex-1 gap-1.5 text-xs h-8 rounded-xl"
-            onClick={(e) => { e.stopPropagation(); onEdit(); }}
-          >
-            <Pencil className="w-3 h-3" /> Edit
-          </Button>
-          <Button
-            size="sm" variant="outline"
-            className="flex-1 gap-1.5 text-xs h-8 rounded-xl text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40"
-            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          >
-            <Trash2 className="w-3 h-3" /> Remove
-          </Button>
-        </div>
+        {(onEdit || onDelete) && (
+          <div className="flex gap-2 mt-4">
+            {onEdit && (
+              <Button
+                size="sm" variant="outline"
+                className="flex-1 gap-1.5 text-xs h-8 rounded-xl"
+                onClick={(e) => { e.stopPropagation(); onEdit(); }}
+              >
+                <Pencil className="w-3 h-3" /> Edit
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                size="sm" variant="outline"
+                className="flex-1 gap-1.5 text-xs h-8 rounded-xl text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40"
+                onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              >
+                <Trash2 className="w-3 h-3" /> Remove
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </motion.div>
   );

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { entities } from "@/api/entities";
-import { type Person, type Chore } from "@/types/entities";
+import { type Profile, type Chore } from "@/types/entities";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, ListChecks, Pencil, DollarSign, Users, Calendar, Repeat2, Star } from "lucide-react";
+import { Plus, Trash2, ListChecks, Pencil, DollarSign, Users, Repeat2, Star } from "lucide-react";
 import PersonAvatar from "@/components/shared/PersonAvatar";
 import EmptyState from "@/components/shared/EmptyState";
 import ChoreDialog, { getChoreIcon } from "@/components/chores/ChoreDialog";
@@ -25,7 +25,7 @@ function getFreqDisplay(frequency: string | undefined): { label: string; color: 
   return { label: days, color: "bg-indigo-500/15 text-indigo-600 border-indigo-400/30" };
 }
 
-function ChoreCard({ chore, onEdit, onDelete, isDeleting }: { chore: Chore; onEdit: (chore: Chore) => void; onDelete: (id: string) => void; isDeleting?: boolean }) {
+function ChoreCard({ chore, onEdit, onDelete }: { chore: Chore; onEdit: (chore: Chore) => void; onDelete: (id: string) => void; isDeleting?: boolean }) {
   const [hovered, setHovered] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const ChoreIcon = getChoreIcon(chore.icon);
@@ -126,7 +126,7 @@ export default function Chores() {
   const queryClient = useQueryClient();
 
   const { data: chores = [], isLoading } = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
-  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Person.list() as Promise<Person[]> });
+  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
 
   const createMutation = useMutation({
     mutationFn: (data: Partial<Chore>) => entities.Chore.create(data) as Promise<Chore>,
@@ -219,7 +219,6 @@ export default function Chores() {
           <motion.div key="content" className="space-y-10">
             {byPerson.map(({ person, chores: pChores }, gi) => {
               const accent = pipeColors[gi % pipeColors.length];
-              const paidChores = pChores.filter(c => (c.payout_per_completion ?? 0) > 0);
               const totalWeeklyPayout = pChores.reduce((s, c) => {
                 const freq = c.frequency || "weekly";
                 const perWeek = freq === "daily" ? 7 : freq === "twice_daily" ? 14 : 1;

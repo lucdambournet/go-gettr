@@ -75,7 +75,7 @@ export default function CashPipe({ person, personIndex, fillPercent, amount, nam
 
   useEffect(() => { springFill.set(fillH); }, [fillH]);
 
-  const [bills, setBills] = useState<BillItem[]>([]);
+  const [_bills, setBills] = useState<BillItem[]>([]);
 
   useEffect(() => {
     if (paying) {
@@ -123,7 +123,7 @@ export default function CashPipe({ person, personIndex, fillPercent, amount, nam
       <div className="relative" style={{ height: PIPE_H, width: 64 }}>
         {/* Payout flying bills */}
         <AnimatePresence>
-          {bills.map(b => (
+          {_bills.map(b => (
             <FlyingBill key={b.id} delay={b.delay} angle={b.angle} distance={b.distance}
               onDone={() => setBills(prev => prev.filter(x => x.id !== b.id))} />
           ))}

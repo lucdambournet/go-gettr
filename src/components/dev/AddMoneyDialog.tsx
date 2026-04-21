@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type Person } from "@/types/entities";
+import { type Profile } from "@/types/entities";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,8 +13,8 @@ const QUICK_AMOUNTS = [0.25, 0.50, 1, 2, 5, 10, 20];
 interface AddMoneyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  kids: Person[];
-  onAdd: (person: Person, amount: number, note: string) => void;
+  kids: Profile[];
+  onAdd: (person: Profile, amount: number, note: string) => void;
 }
 
 export default function AddMoneyDialog({ open, onOpenChange, kids, onAdd }: AddMoneyDialogProps) {

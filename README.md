@@ -1,26 +1,28 @@
-**Welcome to your Base44 project** 
+# GoGettr
 
-**About**
+A family chore and task management app. Assign chores, track weekly progress, and manage your family — all in one place.
 
-View and Edit  your app on [Base44.com](http://Base44.com) 
+## Stack
 
-This project contains everything you need to run your app locally.
+- **Frontend:** React 18 + TypeScript, Vite, Tailwind CSS, shadcn/ui, Framer Motion
+- **Data:** TanStack Query, React Router v6
+- **Backend:** Supabase (auth + Postgres database)
 
-**Edit the code in your local development environment**
+## Getting started
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+```bash
+# 1. Install dependencies
+npm install
 
-**Prerequisites:** 
+# 2. Configure environment
+cp .env.example .env.local  # then fill in your values
+```
 
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
+`.env.local` variables:
 
 ```
 VITE_BASE44_APP_ID=your_app_id
 VITE_BASE44_APP_BASE_URL=your_backend_url
-VITE_SENTRY_DSN=your_sentry_dsn
 
 e.g.
 VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6

@@ -76,7 +76,7 @@ export default function MoneyJar({ fillPercent = 0, amount = 0, paying = false }
       }
     };
     loop();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [clampedFill, fillY]);
 
   // Payout burst

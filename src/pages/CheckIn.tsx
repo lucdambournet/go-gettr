@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { entities } from "@/api/entities";
-import { Person, Streak } from "@/types/entities";
+import { Profile, Streak } from "@/types/entities";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -87,10 +87,10 @@ function StreakCalendar({ streak }: { streak: Streak | undefined | null }) {
 const PERSON_ACCENT_COLORS = ["#6366f1", "#f59e0b", "#ec4899", "#06b6d4", "#8b5cf6", "#10b981"];
 
 function StreakCard({ person, personIndex, streak, onCheckIn, isCheckingIn }: {
-  person: Person;
+  person: Profile;
   personIndex: number;
   streak: Streak | undefined;
-  onCheckIn: (person: Person, streak: Streak | undefined) => void;
+  onCheckIn: (person: Profile, streak: Streak | undefined) => void;
   isCheckingIn: boolean;
 }) {
   const today = formatDate(new Date());
@@ -264,7 +264,7 @@ export default function CheckIn() {
   const queryClient = useQueryClient();
   const [flash, setFlash] = useState<{ reward: number; name: string } | null>(null);
 
-  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Person.list() as Promise<Person[]> });
+  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
   const { data: streaks = [] } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list() as Promise<Streak[]> });
 
   const createStreakMutation = useMutation({
@@ -283,10 +283,10 @@ export default function CheckIn() {
   });
 
   const activePeople = people.filter((p) => p.active !== false && !p.is_parent);
-  const streakMap = useMemo(() => Object.fromEntries(streaks.map((s) => [s.person_id, s])), [streaks]);
+  const streakMap = useMemo(() => Object.fromEntries(streaks.map((s) => [s.profile_id, s])), [streaks]);
   const [checkingInId, setCheckingInId] = useState<string | null>(null);
 
-  const handleCheckIn = async (person: Person, streak: Streak | undefined) => {
+  const handleCheckIn = async (person: Profile, streak: Streak | undefined) => {
     soundCheckIn();
     setCheckingInId(person.id);
     const today = formatDate(new Date());
@@ -295,7 +295,7 @@ export default function CheckIn() {
       newStreak = 1;
       const reward = calcReward(newStreak);
       setFlash({ reward, name: person.name });
-      await createStreakMutation.mutateAsync({ person_id: person.id, current_streak: newStreak, longest_streak: newStreak, last_checkin_date: today, total_rewards_earned: reward });
+      await createStreakMutation.mutateAsync({ profile_id: person.id, current_streak: newStreak, longest_streak: newStreak, last_checkin_date: today, total_rewards_earned: reward });
     } else {
       // Only continue streak if last check-in was exactly yesterday (calendar days)
       const diff = daysDiff(today, streak.last_checkin_date);

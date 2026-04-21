@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useRef } from "react";
+import { motion } from "framer-motion";
 import { COLOR_PALETTE } from "@/components/people/colorUtils";
 import { cn } from "@/lib/utils";
 import { Pipette } from "lucide-react";
@@ -10,7 +10,6 @@ interface ColorPickerProps {
 }
 
 export default function ColorPicker({ value, onChange }: ColorPickerProps) {
-  const [custom, setCustom] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isCustom = value && !COLOR_PALETTE.find((c) => c.hex === value);
@@ -23,7 +22,7 @@ export default function ColorPicker({ value, onChange }: ColorPickerProps) {
         <div className="flex-1 h-px bg-border" />
         <motion.button
           whileTap={{ scale: 0.9 }}
-          onClick={() => { setCustom(true); setTimeout(() => inputRef.current?.click(), 50); }}
+          onClick={() => { setTimeout(() => inputRef.current?.click(), 50); }}
           className={cn(
             "flex items-center gap-1 text-xs px-2 py-1 rounded-md border transition-colors",
             isCustom ? "bg-primary text-primary-foreground border-primary" : "text-muted-foreground border-border hover:bg-secondary"
@@ -52,7 +51,7 @@ export default function ColorPicker({ value, onChange }: ColorPickerProps) {
             background: "conic-gradient(red, yellow, lime, aqua, blue, magenta, red)",
             boxShadow: `0 0 0 3px white, 0 0 0 5px ${value || "#6d5bd0"}`,
           }}
-          onClick={() => { setCustom(true); setTimeout(() => inputRef.current?.click(), 50); }}
+          onClick={() => { setTimeout(() => inputRef.current?.click(), 50); }}
         >
           <div className="absolute inset-2 rounded-full bg-white/40 backdrop-blur-sm flex items-center justify-center">
             <Pipette className="w-3.5 h-3.5 text-white drop-shadow" />

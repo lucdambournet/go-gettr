@@ -17,12 +17,14 @@ import Daily from '@/pages/Daily';
 import Bank from '@/pages/Bank';
 import Notifications from '@/pages/Notifications';
 import DevPanel from '@/pages/DevPanel';
+import Login from '@/pages/Login';
+import Invite from '@/pages/Invite';
+import FamilySetup from '@/pages/FamilySetup';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingProfile, isLoadingPublicSettings, authError, user, profile } = useAuth();
 
-  // Show loading spinner while checking app public settings or auth
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  if (isLoadingPublicSettings || isLoadingAuth || isLoadingProfile) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
@@ -30,18 +32,21 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
   if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
-    }
+    if (authError.type === 'user_not_registered') return <UserNotRegisteredError />;
+    if (authError.type === 'auth_required') return <Navigate to="/login" replace />;
   }
 
-  // Render the main app
+  // Authenticated but no profile yet — gate to setup flow only
+  if (user && !profile) {
+    return (
+      <Routes>
+        <Route path="/family/setup" element={<FamilySetup />} />
+        <Route path="*" element={<Navigate to="/family/setup" replace />} />
+      </Routes>
+    );
+  }
+
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/Daily" replace />} />
@@ -62,14 +67,16 @@ const AuthenticatedApp = () => {
   );
 };
 
-
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
-          <AuthenticatedApp />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/invite" element={<Invite />} />
+            <Route path="/*" element={<AuthenticatedApp />} />
+          </Routes>
         </Router>
         <Toaster />
       </QueryClientProvider>
