@@ -329,19 +329,34 @@ export default function WeeklyView() {
 
   const createLogMutation = useMutation({
     mutationFn: (data: Partial<ChoreLog>) => entities.ChoreLog.create(data) as Promise<ChoreLog>,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["choreLogs"] }),
+    onSuccess: (_, vars) => {
+      if (import.meta.env.DEV) console.log('[WeeklyView] createLogMutation success', { choreId: vars.chore_id, day: vars.day });
+      queryClient.invalidateQueries({ queryKey: ["choreLogs"] });
+    },
+    onError: (err, vars) => {
+      if (import.meta.env.DEV) console.error('[WeeklyView] createLogMutation error', { choreId: vars.chore_id, day: vars.day, err });
+    },
   });
   const deleteLogMutation = useMutation({
     mutationFn: (id: string) => entities.ChoreLog.delete(id) as unknown as Promise<void>,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["choreLogs"] }),
+    onError: (err, id) => {
+      if (import.meta.env.DEV) console.error('[WeeklyView] deleteLogMutation error', { logId: id, err });
+    },
   });
   const updateStreakMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Streak> }) => entities.Streak.update(id, data) as Promise<Streak>,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["streaks"] }),
+    onError: (err, vars) => {
+      if (import.meta.env.DEV) console.error('[WeeklyView] updateStreakMutation error', { streakId: vars.id, err });
+    },
   });
   const createStreakMutation = useMutation({
     mutationFn: (data: Partial<Streak>) => entities.Streak.create(data) as Promise<Streak>,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["streaks"] }),
+    onError: (err, vars) => {
+      if (import.meta.env.DEV) console.error('[WeeklyView] createStreakMutation error', { profileId: vars.profile_id, err });
+    },
   });
 
   const streakMap = useMemo(() => Object.fromEntries(streaks.map((s: Streak) => [s.profile_id, s])), [streaks]);
@@ -362,6 +377,7 @@ export default function WeeklyView() {
     const existing = logMap[key] as ChoreLog | undefined;
     const chore = activeChores.find((c: Chore) => c.id === choreId);
     if (existing && typeof existing === "object" && "id" in existing) {
+      if (import.meta.env.DEV) console.log('[WeeklyView] chore toggled incomplete', { choreId, date: dayStr, completed: false });
       setOptimistic((prev) => { const n = { ...prev }; delete n[key]; return { ...n, [key]: null }; });
       deleteLogMutation.mutate(existing.id, {
         onSettled: () => setOptimistic((prev) => { const n = { ...prev }; delete n[key]; return n; }),
@@ -373,6 +389,7 @@ export default function WeeklyView() {
         }
       }
     } else {
+      if (import.meta.env.DEV) console.log('[WeeklyView] chore toggled complete', { choreId, date: dayStr, completed: true });
       setOptimistic((prev) => ({ ...prev, [key]: true }));
       createLogMutation.mutate({ chore_id: choreId, profile_id: personId, week_start: weekStartStr, day: dayStr, completed: true }, {
         onSettled: () => setOptimistic((prev) => { const n = { ...prev }; delete n[key]; return n; }),
@@ -388,8 +405,20 @@ export default function WeeklyView() {
     }
   };
 
-  const handlePrev = () => { setWeekDir(-1); setWeekStart(getPrevWeek(weekStart)); setOptimistic({}); };
-  const handleNext = () => { setWeekDir(1); setWeekStart(getNextWeek(weekStart)); setOptimistic({}); };
+  const handlePrev = () => {
+    const newWeekStart = getPrevWeek(weekStart);
+    if (import.meta.env.DEV) console.log('[WeeklyView] getPrevWeek called', { newWeekStart: formatDate(newWeekStart) });
+    setWeekDir(-1);
+    setWeekStart(newWeekStart);
+    setOptimistic({});
+  };
+  const handleNext = () => {
+    const newWeekStart = getNextWeek(weekStart);
+    if (import.meta.env.DEV) console.log('[WeeklyView] getNextWeek called', { newWeekStart: formatDate(newWeekStart) });
+    setWeekDir(1);
+    setWeekStart(newWeekStart);
+    setOptimistic({});
+  };
 
   const effectiveLogMap = useMemo(() => {
     const m: LogMap = { ...logMap };

@@ -273,12 +273,18 @@ export default function CheckIn() {
       queryClient.invalidateQueries({ queryKey: ["streaks"] });
       queryClient.invalidateQueries({ queryKey: ["payouts"] });
     },
+    onError: (err, vars) => {
+      if (import.meta.env.DEV) console.error('[CheckIn] createStreakMutation error', { profileId: vars.profile_id, err });
+    },
   });
   const updateStreakMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Streak> }) => entities.Streak.update(id, data) as Promise<Streak>,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["streaks"] });
       queryClient.invalidateQueries({ queryKey: ["payouts"] });
+    },
+    onError: (err, vars) => {
+      if (import.meta.env.DEV) console.error('[CheckIn] updateStreakMutation error', { streakId: vars.id, err });
     },
   });
 
@@ -287,23 +293,30 @@ export default function CheckIn() {
   const [checkingInId, setCheckingInId] = useState<string | null>(null);
 
   const handleCheckIn = async (person: Profile, streak: Streak | undefined) => {
+    if (import.meta.env.DEV) console.log('[CheckIn] handleCheckIn called', { profileId: person.id, currentStreak: streak?.current_streak ?? 0 });
     soundCheckIn();
     setCheckingInId(person.id);
     const today = formatDate(new Date());
-    let newStreak;
+    let newStreak: number;
+    let reward: number;
     if (!streak) {
       newStreak = 1;
-      const reward = calcReward(newStreak);
+      reward = calcReward(newStreak);
+      const initialData = { profile_id: person.id, current_streak: newStreak, longest_streak: newStreak, last_checkin_date: today, total_rewards_earned: reward };
+      if (import.meta.env.DEV) console.log('[CheckIn] createStreakMutation triggered', { profileId: person.id, initialStreakData: initialData });
       setFlash({ reward, name: person.name });
-      await createStreakMutation.mutateAsync({ profile_id: person.id, current_streak: newStreak, longest_streak: newStreak, last_checkin_date: today, total_rewards_earned: reward });
+      await createStreakMutation.mutateAsync(initialData);
     } else {
       // Only continue streak if last check-in was exactly yesterday (calendar days)
       const diff = daysDiff(today, streak.last_checkin_date);
       newStreak = diff === 1 ? (streak.current_streak || 0) + 1 : 1;
-      const reward = calcReward(newStreak);
+      reward = calcReward(newStreak);
+      const updatedValues = { current_streak: newStreak, longest_streak: Math.max(newStreak, streak.longest_streak || 0), last_checkin_date: today, total_rewards_earned: (streak.total_rewards_earned || 0) + reward };
+      if (import.meta.env.DEV) console.log('[CheckIn] updateStreakMutation triggered', { streakId: streak.id, updatedValues });
       setFlash({ reward, name: person.name });
-      await updateStreakMutation.mutateAsync({ id: streak.id, data: { current_streak: newStreak, longest_streak: Math.max(newStreak, streak.longest_streak || 0), last_checkin_date: today, total_rewards_earned: (streak.total_rewards_earned || 0) + reward } });
+      await updateStreakMutation.mutateAsync({ id: streak.id, data: updatedValues });
     }
+    if (import.meta.env.DEV) console.log('[CheckIn] flash/reward animation triggered', { reward, name: person.name });
     setCheckingInId(null);
   };
 
