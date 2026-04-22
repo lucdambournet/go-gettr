@@ -7,9 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, ListChecks, Pencil, DollarSign, Users, Repeat2, Star } from "lucide-react";
 import PersonAvatar from "@/components/shared/PersonAvatar";
 import EmptyState from "@/components/shared/EmptyState";
+import { ErrorAlert } from "@/components/shared/ErrorAlert";
 import ChoreDialog, { getChoreIcon } from "@/components/chores/ChoreDialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/use-toast";
 
 const FREQ_LABELS = {
   daily: { label: "Every Day", color: "bg-blue-500/15 text-blue-600 border-blue-400/30" },
@@ -124,21 +126,26 @@ export default function Chores() {
   const [addOpen, setAddOpen] = useState(false);
   const [editChore, setEditChore] = useState<Chore | null>(null);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const onMutationError = (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" });
 
-  const { data: chores = [], isLoading } = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
+  const { data: chores = [], isLoading, isError, error } = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
   const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
 
   const createMutation = useMutation({
     mutationFn: (data: Partial<Chore>) => entities.Chore.create(data) as Promise<Chore>,
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["chores"] }); setAddOpen(false); },
+    onError: onMutationError,
   });
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Chore> }) => entities.Chore.update(id, data) as Promise<Chore>,
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["chores"] }); setEditChore(null); },
+    onError: onMutationError,
   });
   const deleteMutation = useMutation({
     mutationFn: (id: string) => entities.Chore.delete(id) as unknown as Promise<void>,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["chores"] }),
+    onError: onMutationError,
   });
 
   const activePeople = people.filter((p) => p.active !== false);
@@ -159,6 +166,7 @@ export default function Chores() {
         className="w-7 h-7 border-[3px] border-primary border-t-transparent rounded-full" />
     </div>
   );
+  if (isError) return <ErrorAlert error={error} />;
 
   return (
     <div className="space-y-8">
