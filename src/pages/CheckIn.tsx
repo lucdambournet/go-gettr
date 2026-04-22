@@ -12,6 +12,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { format, differenceInCalendarDays, parseISO } from "date-fns";
 import { soundCheckIn } from "@/lib/useSound";
+import { useToast } from "@/components/ui/use-toast";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { ErrorAlert } from "@/components/shared/ErrorAlert";
 
 // Returns the true calendar-day difference between two date strings
 function daysDiff(dateStrA: string | null | undefined, dateStrB: string | null | undefined): number {
@@ -262,10 +265,11 @@ function RewardFlash({ reward, name, onDone }: { reward: number; name: string; o
 
 export default function CheckIn() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [flash, setFlash] = useState<{ reward: number; name: string } | null>(null);
 
-  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
-  const { data: streaks = [] } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list() as Promise<Streak[]> });
+  const { data: people = [], isLoading: isLoadingPeople, isError: isPeopleError, error: peopleError } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
+  const { data: streaks = [], isLoading: isLoadingStreaks, isError: isStreaksError, error: streaksError } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list() as Promise<Streak[]> });
 
   const createStreakMutation = useMutation({
     mutationFn: (data: Partial<Streak>) => entities.Streak.create(data) as Promise<Streak>,
@@ -273,6 +277,7 @@ export default function CheckIn() {
       queryClient.invalidateQueries({ queryKey: ["streaks"] });
       queryClient.invalidateQueries({ queryKey: ["payouts"] });
     },
+    onError: (error: Error) => toast({ title: "Error", description: error.message, variant: "destructive" }),
   });
   const updateStreakMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Streak> }) => entities.Streak.update(id, data) as Promise<Streak>,
@@ -280,11 +285,16 @@ export default function CheckIn() {
       queryClient.invalidateQueries({ queryKey: ["streaks"] });
       queryClient.invalidateQueries({ queryKey: ["payouts"] });
     },
+    onError: (error: Error) => toast({ title: "Error", description: error.message, variant: "destructive" }),
   });
 
-  const activePeople = people.filter((p) => p.active !== false && !p.is_parent);
   const streakMap = useMemo(() => Object.fromEntries(streaks.map((s) => [s.profile_id, s])), [streaks]);
   const [checkingInId, setCheckingInId] = useState<string | null>(null);
+
+  if (isLoadingPeople || isLoadingStreaks) return <LoadingSpinner />;
+  if (isPeopleError || isStreaksError) return <ErrorAlert error={(peopleError ?? streaksError) as Error} />;
+
+  const activePeople = people.filter((p) => p.active !== false && !p.is_parent);
 
   const handleCheckIn = async (person: Profile, streak: Streak | undefined) => {
     soundCheckIn();
