@@ -112,7 +112,15 @@ export default function FamilySetup() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState<FamilySetupDraft>(() => {
-    return readFamilySetupDraft() ?? createEmptyFamilySetupDraft({ childCount: 0 });
+    const restored = readFamilySetupDraft();
+    if (restored) {
+      if (import.meta.env.DEV) console.log('[FamilySetup] draft restored from sessionStorage', {
+        familyName: restored.familyName,
+        childCount: restored.children.length,
+        spouseEnabled: restored.spouse.enabled,
+      });
+    }
+    return restored ?? createEmptyFamilySetupDraft({ childCount: 0 });
   });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -128,6 +136,11 @@ export default function FamilySetup() {
 
   useEffect(() => {
     writeFamilySetupDraft(draft);
+    if (import.meta.env.DEV) console.log('[FamilySetup] draft saved to sessionStorage', {
+      familyName: draft.familyName,
+      childCount: draft.children.length,
+      spouseEnabled: draft.spouse.enabled,
+    });
   }, [draft]);
 
   useEffect(() => {
@@ -169,18 +182,30 @@ export default function FamilySetup() {
 
   const goNext = () => {
     if (step === 1 && Object.keys(parentErrors).length > 0) {
+      if (import.meta.env.DEV) console.warn('[FamilySetup] step 1 validation failed', { errors: parentErrors });
       setError('Fix the parent details before continuing.');
       return;
     }
 
     if (step === 2 && Object.keys(spouseErrors).length > 0) {
+      if (import.meta.env.DEV) console.warn('[FamilySetup] step 2 validation failed', { errors: spouseErrors });
       setError('Fix the spouse invite details before continuing.');
       return;
     }
 
     if (step === 3 && hasChildErrors) {
+      if (import.meta.env.DEV) console.warn('[FamilySetup] step 3 validation failed', { childErrors });
       setError('Fix the child details before continuing.');
       return;
+    }
+
+    if (import.meta.env.DEV) {
+      const stepData =
+        step === 1 ? { familyName: draft.familyName, parentName: `${draft.parent.firstName} ${draft.parent.lastName}`.trim() } :
+        step === 2 ? { spouseEnabled: draft.spouse.enabled, spouseEmail: draft.spouse.email || undefined } :
+        step === 3 ? { childCount: draft.children.length } :
+        {};
+      console.log('[FamilySetup] step completed', { step, ...stepData });
     }
 
     setError('');
@@ -237,6 +262,11 @@ export default function FamilySetup() {
         navigate('/Daily', { replace: true });
         return;
       }
+
+      if (import.meta.env.DEV) console.log('[FamilySetup] createFamilyFromDraft called', {
+        familyName: draft.familyName,
+        memberCount: 1 + (draft.spouse.enabled ? 1 : 0) + draft.children.length,
+      });
 
       await createFamilyFromDraft({
         authUserId: user.id,
@@ -311,10 +341,13 @@ export default function FamilySetup() {
         },
       });
 
+      if (import.meta.env.DEV) console.log('[FamilySetup] family creation success', { familyName: draft.familyName });
+
       clearFamilySetupDraft();
       await refreshProfile();
       navigate('/Daily', { replace: true });
     } catch (submitError: unknown) {
+      if (import.meta.env.DEV) console.error('[FamilySetup] family creation error', { error: submitError });
       setError(submitError instanceof Error ? submitError.message : 'Failed to create family.');
     } finally {
       setSaving(false);

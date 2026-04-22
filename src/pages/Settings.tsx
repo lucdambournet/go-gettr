@@ -341,6 +341,7 @@ export default function Settings() {
 
   const saveFamilyName = useCallback(async () => {
     if (!family || !familyNameInput.trim()) return;
+    if (import.meta.env.DEV) console.log('[Settings] family name update submitted', { newName: familyNameInput.trim() });
     setSavingFamilyName(true);
     await supabase.from('families').update({ name: familyNameInput.trim() }).eq('id', family.id);
     await Promise.all([
@@ -372,6 +373,7 @@ export default function Settings() {
   const updateVar = (key: string, hexVal: string) => {
     const hsl = hexToHsl(hexVal);
     const next: ThemeVars = { ...current, [key]: hsl };
+    if (import.meta.env.DEV) console.log('[Settings] theme token changed', { token: key, value: hsl });
     setCurrent(next); applyTheme(next); setActiveName("");
   };
 
@@ -466,7 +468,10 @@ export default function Settings() {
               <Button
                 variant="outline"
                 className="w-full gap-2 h-10 rounded-xl text-sm font-semibold"
-                onClick={() => setInviteOpen(true)}
+                onClick={() => {
+                  if (import.meta.env.DEV) console.log('[Settings] invite dialog opened');
+                  setInviteOpen(true);
+                }}
               >
                 <UserPlus className="w-4 h-4" /> Invite Member
               </Button>
@@ -644,7 +649,10 @@ export default function Settings() {
             <Button
               variant="outline"
               className="gap-2 h-11 rounded-xl font-semibold text-destructive border-destructive/30 hover:bg-destructive/10 hover:border-destructive"
-              onClick={signOut}
+              onClick={() => {
+                if (import.meta.env.DEV) console.log('[Settings] sign-out triggered');
+                signOut();
+              }}
             >
               <LogOut className="w-4 h-4" /> Sign out
             </Button>

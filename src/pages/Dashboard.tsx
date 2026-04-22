@@ -172,6 +172,15 @@ export default function Dashboard() {
     totalRewards,
   });
 
+  useEffect(() => {
+    if (!people.length || !chores.length) return;
+    if (import.meta.env.DEV) console.log('[Dashboard] data loaded', {
+      people: people.length,
+      chores: chores.length,
+      logsThisWeek: logs.length,
+    });
+  }, [people.length, chores.length, logs.length]);
+
   // Send notifications when data loads
   useEffect(() => {
     if (!notifEnabled || !people.length || !streaks.length) return;
@@ -202,9 +211,11 @@ export default function Dashboard() {
   const handleToggleNotifications = async () => {
     if (notifEnabled) {
       setNotifEnabled(false);
+      if (import.meta.env.DEV) console.log('[Dashboard] notifications toggled', { enabled: false });
     } else {
       const perm = await requestPermission();
       if (perm === "granted") setNotifEnabled(true);
+      if (import.meta.env.DEV) console.log('[Dashboard] notifications toggled', { enabled: perm === "granted", permission: perm });
     }
   };
 
