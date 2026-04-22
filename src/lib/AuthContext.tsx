@@ -33,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authError, setAuthError] = useState<AuthError | null>(null);
 
   const loadProfile = useCallback(async (authUser: User) => {
+    if (import.meta.env.DEV) console.log('[auth] profile load start', { userId: authUser.id, email: authUser.email });
     setIsLoadingProfile(true);
     try {
       // Fetch profile + family in a single query via JOIN
@@ -46,12 +47,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { families: familyData, ...profileData } = data;
         setProfile(profileData as Profile);
         setFamily((familyData as Family) || null);
+        if (import.meta.env.DEV) console.log('[auth] profile load success', { userId: authUser.id, profileId: profileData.id, familyId: (familyData as Family | null)?.id });
         return;
       }
 
       // No profile — check for a pending invite token saved before OAuth redirect
       const pending = inviteStorage.get();
       if (pending) {
+        if (import.meta.env.DEV) console.log('[auth] pending invite token detected', { token: pending.token });
         const { data: invite } = await supabase
           .from('family_invitations')
           .select('*')
@@ -60,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .maybeSingle();
 
         if (invite) {
+          if (import.meta.env.DEV) console.log('[auth] invite acceptance flow start', { inviteId: invite.id, role: invite.role, familyId: invite.family_id });
           // INSERT profile, UPDATE invitation, and fetch family all in parallel
           const [insertResult, , familyResult] = await Promise.all([
             supabase
@@ -90,13 +94,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (insertResult.data) {
             setProfile(insertResult.data as Profile);
             setFamily((familyResult.data as Family) || null);
+            if (import.meta.env.DEV) console.log('[auth] invite acceptance flow end — profile created', { profileId: insertResult.data.id });
           }
         } else {
           // Token invalid or expired
+          if (import.meta.env.DEV) console.warn('[auth] pending invite token invalid or expired', { token: pending.token });
           inviteStorage.clear();
         }
       }
       // If still no profile, App.tsx redirects to /family/setup
+    } catch (error) {
+      if (import.meta.env.DEV) console.error('[auth] profile load failed', { error });
+      throw error;
     } finally {
       setIsLoadingProfile(false);
     }
@@ -119,10 +128,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // so getSession() is not needed and would cause a redundant loadProfile call.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
+        if (import.meta.env.DEV) console.log('[auth] user signed in', { event: _event, userId: session.user.id, email: session.user.email });
         setUser(session.user);
         setAuthError(null);
         loadProfile(session.user);
       } else {
+        if (import.meta.env.DEV) console.log('[auth] user signed out', { event: _event });
         setUser(null);
         setProfile(null);
         setFamily(null);
@@ -134,6 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadProfile]);
 
   const signOut = async () => {
+    if (import.meta.env.DEV) console.log('[auth] signOut() called');
     if (isE2EMockAuthEnabled()) {
       clearE2EAuthState();
       setUser(null);
@@ -147,6 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshProfile = useCallback(async () => {
+    if (import.meta.env.DEV) console.log('[auth] refreshProfile() called', { userId: user?.id });
     if (isE2EMockAuthEnabled()) {
       const state = readE2EAuthState();
       setUser(state?.user ? (state.user as User) : null);

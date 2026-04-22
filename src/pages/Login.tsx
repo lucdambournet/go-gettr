@@ -39,6 +39,7 @@ export default function Login() {
   };
 
   const handleGoogleSignIn = () => {
+    if (import.meta.env.DEV) console.log('[Login] Google OAuth sign-in button clicked');
     seedDraft('google');
 
     if (isE2EMockAuthEnabled()) {
@@ -64,15 +65,18 @@ export default function Login() {
     setError('');
 
     if (!username.trim()) {
+      if (import.meta.env.DEV) console.warn('[Login] form validation failed — username is empty');
       setError('Enter a username.');
       return;
     }
 
     if (password.length < 6) {
+      if (import.meta.env.DEV) console.warn('[Login] form validation failed — password too short');
       setError('Password must be at least 6 characters.');
       return;
     }
 
+    if (import.meta.env.DEV) console.log('[Login] username/password form submitted', { mode, username: username.trim() });
     setLoading(true);
     seedDraft('username');
 
@@ -111,7 +115,10 @@ export default function Login() {
           throw authError;
         }
       }
+
+      if (import.meta.env.DEV) console.log('[Login] auth success — navigating away', { mode });
     } catch (submitError: unknown) {
+      if (import.meta.env.DEV) console.error('[Login] auth error', { error: submitError, mode });
       setError(submitError instanceof Error ? submitError.message : 'Something went wrong.');
     } finally {
       setLoading(false);
