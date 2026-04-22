@@ -113,11 +113,23 @@ export default function Notifications() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Notification> }) => entities.Notification.update(id, data) as Promise<Notification>,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+    onSuccess: (_result, variables) => {
+      if (import.meta.env.DEV) console.log('[Notifications] notification marked read', { notificationId: variables.id });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+    onError: (error, variables) => {
+      if (import.meta.env.DEV) console.error('[Notifications] mark read failed', { notificationId: variables.id, error });
+    },
   });
   const deleteMutation = useMutation({
     mutationFn: (id: string) => entities.Notification.delete(id) as unknown as Promise<void>,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+    onSuccess: (_result, id) => {
+      if (import.meta.env.DEV) console.log('[Notifications] notification deleted', { notificationId: id });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+    onError: (error, id) => {
+      if (import.meta.env.DEV) console.error('[Notifications] delete failed', { notificationId: id, error });
+    },
   });
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -205,8 +217,14 @@ export default function Notifications() {
                       notif={n}
                       people={people}
                       index={i}
-                      onMarkRead={(n) => updateMutation.mutate({ id: n.id, data: { read: true } })}
-                      onDelete={(n) => deleteMutation.mutate(n.id)}
+                      onMarkRead={(n) => {
+                        if (import.meta.env.DEV) console.log('[Notifications] mark read called', { notificationId: n.id });
+                        updateMutation.mutate({ id: n.id, data: { read: true } });
+                      }}
+                      onDelete={(n) => {
+                        if (import.meta.env.DEV) console.log('[Notifications] delete called', { notificationId: n.id });
+                        deleteMutation.mutate(n.id);
+                      }}
                     />
                   ))}
                 </AnimatePresence>

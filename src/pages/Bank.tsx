@@ -602,11 +602,23 @@ export default function Bank() {
 
   const createPayoutMutation = useMutation({
     mutationFn: (data) => entities.Payout.create(data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["payouts"] }),
+    onSuccess: (result) => {
+      if (import.meta.env.DEV) console.log('[Bank] createPayout succeeded', { payoutId: result?.id, amount: result?.amount });
+      queryClient.invalidateQueries({ queryKey: ["payouts"] });
+    },
+    onError: (error) => {
+      if (import.meta.env.DEV) console.error('[Bank] createPayout failed', { error });
+    },
   });
   const updatePayoutMutation = useMutation({
     mutationFn: ({ id, data }) => entities.Payout.update(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["payouts"] }),
+    onSuccess: (result) => {
+      if (import.meta.env.DEV) console.log('[Bank] updatePayout succeeded', { payoutId: result?.id, newStatus: result?.status });
+      queryClient.invalidateQueries({ queryKey: ["payouts"] });
+    },
+    onError: (error) => {
+      if (import.meta.env.DEV) console.error('[Bank] updatePayout failed', { error });
+    },
   });
 
   const activePeople = people.filter(p => p.active !== false);
@@ -623,6 +635,8 @@ export default function Bank() {
   };
 
   const handleCashOut = async (person, amount) => {
+    if (import.meta.env.DEV) console.log('[Bank] cash out initiated', { profileId: person.id, amount });
+    if (import.meta.env.DEV) console.log('[Bank] sound triggered', { sound: 'soundCashOut' });
     soundCashOut();
     setCashingOutId(person.id);
     // Capture the pieces to burst BEFORE the payout is created (balance will change)
@@ -640,6 +654,8 @@ export default function Bank() {
   };
 
   const handleMarkPaid = async (payout) => {
+    if (import.meta.env.DEV) console.log('[Bank] mark paid initiated', { payoutId: payout.id, profileId: payout.profile_id });
+    if (import.meta.env.DEV) console.log('[Bank] sound triggered', { sound: 'soundPaid' });
     soundPaid();
     await updatePayoutMutation.mutateAsync({ id: payout.id, data: { status: "paid", paid_date: formatDate(new Date()) } });
   };
