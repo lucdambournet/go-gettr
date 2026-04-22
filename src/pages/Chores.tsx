@@ -129,17 +129,52 @@ export default function Chores() {
   const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
 
   const createMutation = useMutation({
-    mutationFn: (data: Partial<Chore>) => entities.Chore.create(data) as Promise<Chore>,
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["chores"] }); setAddOpen(false); },
+    mutationFn: (data: Partial<Chore>) => {
+      if (import.meta.env.DEV) console.log('[Chores] creating chore', { name: data.title, assignedTo: data.assigned_to });
+      return entities.Chore.create(data) as Promise<Chore>;
+    },
+    onSuccess: () => {
+      if (import.meta.env.DEV) console.log('[Chores] chore created successfully');
+      queryClient.invalidateQueries({ queryKey: ["chores"] });
+      setAddOpen(false);
+    },
+    onError: (error) => {
+      if (import.meta.env.DEV) console.error('[Chores] create chore failed', { error });
+    },
   });
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Chore> }) => entities.Chore.update(id, data) as Promise<Chore>,
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["chores"] }); setEditChore(null); },
+    mutationFn: ({ id, data }: { id: string; data: Partial<Chore> }) => {
+      if (import.meta.env.DEV) console.log('[Chores] updating chore', { choreId: id, changes: data });
+      return entities.Chore.update(id, data) as Promise<Chore>;
+    },
+    onSuccess: () => {
+      if (import.meta.env.DEV) console.log('[Chores] chore updated successfully');
+      queryClient.invalidateQueries({ queryKey: ["chores"] });
+      setEditChore(null);
+    },
+    onError: (error) => {
+      if (import.meta.env.DEV) console.error('[Chores] update chore failed', { error });
+    },
   });
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => entities.Chore.delete(id) as unknown as Promise<void>,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["chores"] }),
+    mutationFn: (id: string) => {
+      const chore = chores.find((c) => c.id === id);
+      if (import.meta.env.DEV) console.log('[Chores] deleting chore', { choreId: id, choreName: chore?.title });
+      return entities.Chore.delete(id) as unknown as Promise<void>;
+    },
+    onSuccess: () => {
+      if (import.meta.env.DEV) console.log('[Chores] chore deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ["chores"] });
+    },
+    onError: (error) => {
+      if (import.meta.env.DEV) console.error('[Chores] delete chore failed', { error });
+    },
   });
+
+  const handleEditChore = (chore: Chore) => {
+    if (import.meta.env.DEV) console.log('[Chores] edit chore dialog opened', { choreId: chore.id, choreName: chore.title });
+    setEditChore(chore);
+  };
 
   const activePeople = people.filter((p) => p.active !== false);
   const activeChores = chores.filter((c) => c.active !== false);
@@ -181,7 +216,7 @@ export default function Chores() {
               <Button
                 className="gap-2 rounded-xl shadow-lg shadow-primary/20 font-semibold h-10"
                 disabled={activePeople.length === 0}
-                onClick={() => setAddOpen(true)}
+                onClick={() => { if (import.meta.env.DEV) console.log('[Chores] add chore dialog opened'); setAddOpen(true); }}
               >
                 <motion.span animate={addOpen ? { rotate: 45 } : { rotate: 0 }} transition={{ type: "spring", stiffness: 300 }} className="flex">
                   <Plus className="w-4 h-4" />
@@ -272,7 +307,7 @@ export default function Chores() {
                         <motion.div key={chore.id} custom={ci}>
                           <ChoreCard
                             chore={chore}
-                            onEdit={setEditChore}
+                            onEdit={handleEditChore}
                             onDelete={(id) => deleteMutation.mutate(id)}
                             isDeleting={deleteMutation.isPending}
                           />
@@ -294,7 +329,7 @@ export default function Chores() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
                   {unassigned.map((chore) => (
-                    <ChoreCard key={chore.id} chore={chore} onEdit={setEditChore} onDelete={(id) => deleteMutation.mutate(id)} />
+                    <ChoreCard key={chore.id} chore={chore} onEdit={handleEditChore} onDelete={(id) => deleteMutation.mutate(id)} />
                   ))}
                 </div>
               </motion.div>
