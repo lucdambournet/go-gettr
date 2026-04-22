@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { searchProfileByEmail, addProfileToFamily } from '@/api/entities';
+import { entities, searchProfileByEmail, addProfileToFamily } from '@/api/entities';
 import { useAuth } from '@/lib/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -101,17 +100,11 @@ export default function InviteDialog({ open, onOpenChange }: Props) {
     setActionPending(true);
     setError('');
     try {
-      const { data: invite, error: inviteErr } = await supabase
-        .from('family_invitations')
-        .insert({
-          family_id: family.id,
-          email: email.trim().toLowerCase(),
-          role,
-        })
-        .select()
-        .single();
-
-      if (inviteErr) throw inviteErr;
+      const invite = await entities.FamilyInvitation.create({
+        family_id: family.id,
+        email: email.trim().toLowerCase(),
+        role,
+      });
 
       const link = `${window.location.origin}/invite?token=${invite.token}`;
       setInviteLink(link);
