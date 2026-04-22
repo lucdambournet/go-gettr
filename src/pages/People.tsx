@@ -7,22 +7,25 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Plus, Users, UserPlus } from "lucide-react";
 import EmptyState from "@/components/shared/EmptyState";
+import { ErrorAlert } from "@/components/shared/ErrorAlert";
 import PersonDialog from "@/components/people/PersonDialog";
 import PersonContactCard from "@/components/people/PersonContactCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { getWeekStart, getWeekDays, formatDate, choreWeekStats } from "@/components/shared/weekUtils";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function People() {
   const { isParent, family } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
   const [editProfile, setEditProfile] = useState<Profile | null>(null);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const weekStart = getWeekStart();
   const weekDays = getWeekDays(weekStart);
   const weekStartStr = formatDate(weekStart);
 
-  const { data: people = [], isLoading } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
+  const { data: people = [], isLoading, isError, error } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
   const { data: chores = [] } = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
   const { data: logs = [] } = useQuery({
     queryKey: ["choreLogs", weekStartStr],
@@ -30,17 +33,22 @@ export default function People() {
   });
   const { data: streaks = [] } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list() as Promise<Streak[]> });
 
+  const onMutationError = (error: Error) => toast({ title: "Error", description: error.message, variant: "destructive" });
+
   const createMutation = useMutation({
     mutationFn: (data: Partial<Profile>) => entities.Profile.create({ ...data, family_id: family?.id }) as unknown as Promise<Profile>,
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["people"] }); setAddOpen(false); },
+    onError: onMutationError,
   });
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Profile> }) => entities.Profile.update(id, data) as unknown as Promise<Profile>,
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["people"] }); setEditProfile(null); },
+    onError: onMutationError,
   });
   const deleteMutation = useMutation({
     mutationFn: (id: string) => entities.Profile.delete(id) as unknown as Promise<void>,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["people"] }),
+    onError: onMutationError,
   });
 
   const activePeople = people.filter((p) => p.active !== false);
@@ -76,6 +84,7 @@ export default function People() {
         className="w-7 h-7 border-[3px] border-primary border-t-transparent rounded-full" />
     </div>
   );
+  if (isError) return <ErrorAlert error={error} />;
 
   return (
     <div className="space-y-8">
