@@ -13,6 +13,8 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useNotifications, isStreakAtRisk, hasStreakBroken } from "@/hooks/useNotifications";
 import AchievementsPanel, { useAchievements } from "@/components/achievements/AchievementSystem";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { ErrorAlert } from "@/components/shared/ErrorAlert";
 
 // Day keys map
 const DAY_KEY_MAP = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
@@ -99,13 +101,22 @@ export default function Dashboard() {
   const { requestPermission, sendNotification, permission } = useNotifications();
   const [notifEnabled, setNotifEnabled] = useState(permission === "granted");
 
-  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
-  const { data: chores = [] } = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
-  const { data: logs = [] } = useQuery({
+  const peopleQuery = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
+  const choresQuery = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
+  const logsQuery = useQuery({
     queryKey: ["choreLogs", weekStartStr],
     queryFn: () => entities.ChoreLog.filter({ week_start: weekStartStr }) as Promise<ChoreLog[]>,
   });
-  const { data: streaks = [] } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list() as Promise<Streak[]> });
+  const streaksQuery = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list() as Promise<Streak[]> });
+
+  const isLoading = peopleQuery.isLoading || choresQuery.isLoading || logsQuery.isLoading || streaksQuery.isLoading;
+  const isError = peopleQuery.isError || choresQuery.isError || logsQuery.isError || streaksQuery.isError;
+  const error = (peopleQuery.error ?? choresQuery.error ?? logsQuery.error ?? streaksQuery.error) as Error | null;
+
+  const people = peopleQuery.data ?? [];
+  const chores = choresQuery.data ?? [];
+  const logs = logsQuery.data ?? [];
+  const streaks = streaksQuery.data ?? [];
 
   const activePeople = people.filter((p) => p.active !== false);
   const activeChores = chores.filter((c) => c.active !== false);
@@ -207,6 +218,9 @@ export default function Dashboard() {
       if (perm === "granted") setNotifEnabled(true);
     }
   };
+
+  if (isLoading) return <LoadingSpinner />;
+  if (isError) return <ErrorAlert error={error} />;
 
   return (
     <div className="space-y-8">
