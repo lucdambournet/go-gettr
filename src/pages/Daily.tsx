@@ -13,6 +13,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { soundComplete, soundUncomplete } from "@/lib/useSound";
 import StampAnimation from "@/components/chores/StampAnimation";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { ErrorAlert } from "@/components/shared/ErrorAlert";
+import { useToast } from "@/components/ui/use-toast";
 
 const DAY_KEY_MAP = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
@@ -387,36 +390,48 @@ function PersonSection({ person, personIndex, chores, logMap, onToggle, todayStr
 
 export default function Daily() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const today = new Date();
   const weekStart = getWeekStart(today);
   const weekStartStr = formatDate(weekStart);
   const todayStr = formatDate(today);
 
-  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
-  const { data: chores = [] } = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
-  const { data: logs = [] } = useQuery({
+  const { data: people = [], isLoading: isLoadingPeople, isError: isPeopleError, error: peopleError } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
+  const { data: chores = [], isLoading: isLoadingChores, isError: isChoresError, error: choresError } = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
+  const { data: logs = [], isLoading: isLoadingLogs, isError: isLogsError, error: logsError } = useQuery({
     queryKey: ["choreLogs", weekStartStr],
     queryFn: () => entities.ChoreLog.filter({ week_start: weekStartStr }) as Promise<ChoreLog[]>,
   });
   const { data: streaks = [] } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list() as Promise<Streak[]> });
 
+  const isLoading = isLoadingPeople || isLoadingChores || isLoadingLogs;
+  const isError = isPeopleError || isChoresError || isLogsError;
+  const error = (peopleError || choresError || logsError) as Error | null;
+
   const streakMap = useMemo(() => Object.fromEntries(streaks.map((s: Streak) => [s.profile_id, s])), [streaks]);
+
+  const onMutationError = (err: Error) =>
+    toast({ title: "Error", description: err.message, variant: "destructive" });
 
   const createLogMutation = useMutation({
     mutationFn: (data: Partial<ChoreLog>) => entities.ChoreLog.create(data) as Promise<ChoreLog>,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["choreLogs"] }),
+    onError: onMutationError,
   });
   const deleteLogMutation = useMutation({
     mutationFn: (id: string) => entities.ChoreLog.delete(id) as unknown as Promise<void>,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["choreLogs"] }),
+    onError: onMutationError,
   });
   const updateStreakMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Streak> }) => entities.Streak.update(id, data) as Promise<Streak>,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["streaks"] }),
+    onError: onMutationError,
   });
   const createStreakMutation = useMutation({
     mutationFn: (data: Partial<Streak>) => entities.Streak.create(data) as Promise<Streak>,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["streaks"] }),
+    onError: onMutationError,
   });
 
   const activePeople = people.filter((p: Profile) => p.active !== false && !p.is_parent);
@@ -480,6 +495,9 @@ export default function Daily() {
     });
     return { total, done, progress: total > 0 ? Math.round((done / total) * 100) : 0 };
   }, [activePeople, activeChores, logMap, todayStr]);
+
+  if (isLoading) return <LoadingSpinner />;
+  if (isError) return <ErrorAlert error={error} />;
 
   const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
