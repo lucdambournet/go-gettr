@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { entities } from '@/api/entities';
 import { useAuth } from '@/lib/AuthContext';
 import { COLOR_PALETTE, getAvatarStyle } from '@/components/people/colorUtils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -21,49 +21,23 @@ export default function FamilyMemberList() {
   const { data: members = [] } = useQuery({
     queryKey: ['family-profiles', family?.id],
     enabled: !!family?.id,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('family_id', family!.id);
-      if (error) throw error;
-      return (data ?? []) as Profile[];
-    },
+    queryFn: () => entities.Profile.filter({ family_id: family!.id }) as Promise<Profile[]>,
   });
 
   const { data: pendingInvites = [] } = useQuery({
     queryKey: ['family-invitations', family?.id],
     enabled: !!family?.id && isParent,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('family_invitations')
-        .select('*')
-        .eq('family_id', family!.id)
-        .eq('status', 'pending');
-      if (error) throw error;
-      return (data ?? []) as FamilyInvitation[];
-    },
+    queryFn: () =>
+      entities.FamilyInvitation.filter({ family_id: family!.id, status: 'pending' }) as Promise<FamilyInvitation[]>,
   });
 
   const removeMember = useMutation({
-    mutationFn: async (profileId: string) => {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ family_id: null })
-        .eq('id', profileId);
-      if (error) throw error;
-    },
+    mutationFn: (profileId: string) => entities.Profile.update(profileId, { family_id: null }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['family-profiles', family?.id] }),
   });
 
   const cancelInvite = useMutation({
-    mutationFn: async (inviteId: string) => {
-      const { error } = await supabase
-        .from('family_invitations')
-        .delete()
-        .eq('id', inviteId);
-      if (error) throw error;
-    },
+    mutationFn: (inviteId: string) => entities.FamilyInvitation.delete(inviteId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['family-invitations', family?.id] }),
   });
 
