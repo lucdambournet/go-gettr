@@ -5,8 +5,7 @@ describe('familySetupSave', () => {
   it('creates unassigned chores for email children and assigned chores for username children', async () => {
     const db = {
       createFamily: vi.fn().mockResolvedValue({ id: 'family-1' }),
-      createParentProfile: vi.fn().mockResolvedValue({ id: 'parent-1' }),
-      createChildProfile: vi.fn().mockResolvedValue({ id: 'child-1' }),
+      createProfile: vi.fn().mockResolvedValue({ id: 'child-1' }),
       createInvitation: vi.fn().mockResolvedValue({ id: 'invite-1' }),
       createChore: vi.fn().mockResolvedValue({ id: 'chore-1' }),
     };
@@ -56,7 +55,7 @@ describe('familySetupSave', () => {
       2,
       expect.objectContaining({ title: 'Wash dishes', assigned_to: null }),
     );
-    expect(db.createChildProfile).toHaveBeenCalledWith(
+    expect(db.createProfile).toHaveBeenCalledWith(
       expect.objectContaining({
         birthdate: '2016-01-01',
       }),

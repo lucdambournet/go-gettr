@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/AuthContext';
 import { isE2EMockAuthEnabled, readE2EAuthState, writeE2EAuthState } from '@/lib/e2eAuth';
-import { supabase } from '@/lib/supabase';
+import { entities } from '@/api/entities';
 import { suggestStarterPassword } from '@/lib/familySetupAuth';
 import {
   clearFamilySetupDraft,
@@ -244,69 +244,20 @@ export default function FamilySetup() {
         draft,
         db: {
           async createFamily(input) {
-            const { data, error: queryError } = await supabase
-              .from('families')
-              .insert(input)
-              .select()
-              .single();
-
-            if (queryError || !data) {
-              throw queryError ?? new Error('Failed to create family.');
-            }
-
-            return { id: data.id as string };
+            const row = await entities.Family.create(input);
+            return { id: row.id as string };
           },
-          async createParentProfile(input) {
-            const { data, error: queryError } = await supabase
-              .from('profiles')
-              .insert(input)
-              .select()
-              .single();
-
-            if (queryError || !data) {
-              throw queryError ?? new Error('Failed to create parent profile.');
-            }
-
-            return { id: data.id as string };
-          },
-          async createChildProfile(input) {
-            const { data, error: queryError } = await supabase
-              .from('profiles')
-              .insert(input)
-              .select()
-              .single();
-
-            if (queryError || !data) {
-              throw queryError ?? new Error('Failed to create child profile.');
-            }
-
-            return { id: data.id as string };
+          async createProfile(input) {
+            const row = await entities.Profile.create(input);
+            return { id: row.id as string };
           },
           async createInvitation(input) {
-            const { data, error: queryError } = await supabase
-              .from('family_invitations')
-              .insert(input)
-              .select()
-              .single();
-
-            if (queryError || !data) {
-              throw queryError ?? new Error('Failed to create invitation.');
-            }
-
-            return { id: data.id as string };
+            const row = await entities.FamilyInvitation.create(input);
+            return { id: row.id as string };
           },
           async createChore(input) {
-            const { data, error: queryError } = await supabase
-              .from('chore')
-              .insert(input)
-              .select()
-              .single();
-
-            if (queryError || !data) {
-              throw queryError ?? new Error('Failed to create chore.');
-            }
-
-            return { id: data.id as string };
+            const row = await entities.Chore.create(input);
+            return { id: row.id as string };
           },
         },
       });

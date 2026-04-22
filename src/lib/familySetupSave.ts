@@ -2,8 +2,7 @@ import type { FamilySetupDraft } from './familySetupTypes';
 
 interface FamilySetupDb {
   createFamily: (input: { name: string; created_by: string }) => Promise<{ id: string }>;
-  createParentProfile: (input: Record<string, unknown>) => Promise<{ id: string }>;
-  createChildProfile: (input: Record<string, unknown>) => Promise<{ id: string }>;
+  createProfile: (input: Record<string, unknown>) => Promise<{ id: string }>;
   createInvitation: (input: Record<string, unknown>) => Promise<{ id: string }>;
   createChore: (input: Record<string, unknown>) => Promise<{ id: string }>;
 }
@@ -26,7 +25,7 @@ export async function createFamilyFromDraft({
     created_by: authUserId,
   });
 
-  await db.createParentProfile({
+  await db.createProfile({
     auth_user_id: authUserId,
     first_name: draft.parent.firstName,
     last_name: draft.parent.lastName,
@@ -46,7 +45,7 @@ export async function createFamilyFromDraft({
 
   for (const child of draft.children) {
     if (child.accountMode === 'username') {
-      const profile = await db.createChildProfile({
+      const profile = await db.createProfile({
         first_name: child.firstName,
         last_name: child.lastName,
         email: child.username.trim(),
