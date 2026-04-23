@@ -404,19 +404,34 @@ export default function Daily() {
 
   const createLogMutation = useMutation({
     mutationFn: (data: Partial<ChoreLog>) => entities.ChoreLog.create(data) as Promise<ChoreLog>,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["choreLogs"] }),
+    onSuccess: (_, vars) => {
+      if (import.meta.env.DEV) console.log('[Daily] createLogMutation success', { choreId: vars.chore_id });
+      queryClient.invalidateQueries({ queryKey: ["choreLogs"] });
+    },
+    onError: (err, vars) => {
+      if (import.meta.env.DEV) console.error('[Daily] createLogMutation error', { choreId: vars.chore_id, err });
+    },
   });
   const deleteLogMutation = useMutation({
     mutationFn: (id: string) => entities.ChoreLog.delete(id) as unknown as Promise<void>,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["choreLogs"] }),
+    onError: (err, id) => {
+      if (import.meta.env.DEV) console.error('[Daily] deleteLogMutation error', { logId: id, err });
+    },
   });
   const updateStreakMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Streak> }) => entities.Streak.update(id, data) as Promise<Streak>,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["streaks"] }),
+    onError: (err, vars) => {
+      if (import.meta.env.DEV) console.error('[Daily] updateStreakMutation error', { streakId: vars.id, err });
+    },
   });
   const createStreakMutation = useMutation({
     mutationFn: (data: Partial<Streak>) => entities.Streak.create(data) as Promise<Streak>,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["streaks"] }),
+    onError: (err, vars) => {
+      if (import.meta.env.DEV) console.error('[Daily] createStreakMutation error', { profileId: vars.profile_id, err });
+    },
   });
 
   const activePeople = people.filter((p: Profile) => p.active !== false && !p.is_parent);
@@ -443,6 +458,7 @@ export default function Daily() {
     const key = `${chore.id}_${dayStr}`;
     const existing = serverLogMap[key];
     if (existing) {
+      if (import.meta.env.DEV) console.log('[Daily] chore toggled incomplete', { choreId: chore.id, choreName: chore.title, completed: false });
       setOptimistic(prev => ({ ...prev, [key]: null }));
       deleteLogMutation.mutate(existing.id, {
         onSettled: () => setOptimistic(prev => { const n = { ...prev }; delete n[key]; return n; }),
@@ -450,10 +466,12 @@ export default function Daily() {
       if ((chore.payout_per_completion ?? 0) > 0) {
         const streak = streakMap[personId];
         if (streak) {
+          if (import.meta.env.DEV) console.log('[Daily] updateStreakMutation called', { streakId: streak.id, rewardDelta: -(chore.payout_per_completion ?? 0) });
           updateStreakMutation.mutate({ id: streak.id, data: { total_rewards_earned: Math.max(0, (streak.total_rewards_earned || 0) - (chore.payout_per_completion ?? 0)) } });
         }
       }
     } else {
+      if (import.meta.env.DEV) console.log('[Daily] chore toggled complete', { choreId: chore.id, choreName: chore.title, completed: true });
       setOptimistic(prev => ({ ...prev, [key]: true }));
       createLogMutation.mutate(
         { chore_id: chore.id, profile_id: personId, week_start: weekStartStr, day: dayStr, completed: true },
@@ -462,6 +480,7 @@ export default function Daily() {
       if ((chore.payout_per_completion ?? 0) > 0) {
         const streak = streakMap[personId];
         if (streak) {
+          if (import.meta.env.DEV) console.log('[Daily] updateStreakMutation called', { streakId: streak.id, rewardDelta: chore.payout_per_completion ?? 0 });
           updateStreakMutation.mutate({ id: streak.id, data: { total_rewards_earned: (streak.total_rewards_earned || 0) + (chore.payout_per_completion ?? 0) } });
         } else {
           createStreakMutation.mutate({ profile_id: personId, current_streak: 0, longest_streak: 0, last_checkin_date: null, total_rewards_earned: chore.payout_per_completion ?? 0 });
