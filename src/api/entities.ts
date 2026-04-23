@@ -5,6 +5,7 @@ type Row = Record<string, unknown>;
 function makeEntity(tableName: string) {
   return {
     async list(sort?: string, limit?: number) {
+      if (import.meta.env.DEV) console.log('[api] list', { table: tableName });
       let query = supabase.from(tableName).select('*');
       if (sort) {
         const desc = sort.startsWith('-');
@@ -19,6 +20,7 @@ function makeEntity(tableName: string) {
     },
 
     async filter(filters: Row) {
+      if (import.meta.env.DEV) console.log('[api] filter', { table: tableName, conditions: filters });
       let query = supabase.from(tableName).select('*');
       for (const [key, value] of Object.entries(filters)) {
         query = query.eq(key, value as string);
@@ -29,6 +31,7 @@ function makeEntity(tableName: string) {
     },
 
     async create(data: Row) {
+      if (import.meta.env.DEV) console.log('[api] create', { table: tableName });
       const { data: result, error } = await supabase
         .from(tableName)
         .insert(data)
@@ -39,6 +42,7 @@ function makeEntity(tableName: string) {
     },
 
     async update(id: string, data: Row) {
+      if (import.meta.env.DEV) console.log('[api] update', { table: tableName, id });
       const { data: result, error } = await supabase
         .from(tableName)
         .update({ ...data, updated_at: new Date().toISOString() })
@@ -50,6 +54,7 @@ function makeEntity(tableName: string) {
     },
 
     async delete(id: string) {
+      if (import.meta.env.DEV) console.log('[api] delete', { table: tableName, id });
       const { error } = await supabase.from(tableName).delete().eq('id', id);
       if (error) throw error;
     },
@@ -102,12 +107,14 @@ export const entities = {
 };
 
 export async function searchProfileByEmail(email: string) {
+  if (import.meta.env.DEV) console.log('[api] rpc searchProfileByEmail', { email });
   const { data, error } = await supabase.rpc('search_profile_by_email', { search_email: email });
   if (error) throw error;
   return (data ?? []).map(addProfileComputedFields);
 }
 
 export async function addProfileToFamily(targetProfileId: string, role: 'parent' | 'child') {
+  if (import.meta.env.DEV) console.log('[api] rpc addProfileToFamily', { targetProfileId, role });
   const { error } = await supabase.rpc('add_profile_to_family', {
     target_profile_id: targetProfileId,
     target_role: role,
