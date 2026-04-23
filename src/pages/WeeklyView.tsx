@@ -2,6 +2,8 @@ import { useState, useMemo } from "react";
 import { entities } from "@/api/entities";
 import { type Profile, type Chore, type ChoreLog, type Streak } from "@/types/entities";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/use-toast";
+import { ErrorAlert } from "@/components/shared/ErrorAlert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -318,11 +320,13 @@ export default function WeeklyView() {
   const weekDays = getWeekDays(weekStart);
   const weekStartStr = formatDate(weekStart);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const onMutationError = (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" });
 
   const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
   const { data: chores = [] } = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
   const { data: streaks = [] } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list() as Promise<Streak[]> });
-  const { data: logs = [], isLoading } = useQuery({
+  const { data: logs = [], isLoading, isError, error } = useQuery({
     queryKey: ["choreLogs", weekStartStr],
     queryFn: () => entities.ChoreLog.filter({ week_start: weekStartStr }) as Promise<ChoreLog[]>,
   });
@@ -330,10 +334,12 @@ export default function WeeklyView() {
   const createLogMutation = useMutation({
     mutationFn: (data: Partial<ChoreLog>) => entities.ChoreLog.create(data) as Promise<ChoreLog>,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["choreLogs"] }),
+    onError: onMutationError,
   });
   const deleteLogMutation = useMutation({
     mutationFn: (id: string) => entities.ChoreLog.delete(id) as unknown as Promise<void>,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["choreLogs"] }),
+    onError: onMutationError,
   });
   const updateStreakMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Streak> }) => entities.Streak.update(id, data) as Promise<Streak>,
@@ -409,6 +415,8 @@ export default function WeeklyView() {
     });
     return { expected, done, progress: expected > 0 ? Math.round((done / expected) * 100) : 0 };
   }, [activeChores, weekDays, effectiveLogMap]);
+
+  if (isError) return <ErrorAlert error={error} />;
 
   return (
     <div>
