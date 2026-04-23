@@ -9,6 +9,9 @@ import { Bell, CheckCheck, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/components/shared/weekUtils";
 import PersonAvatar from "@/components/shared/PersonAvatar";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { ErrorAlert } from "@/components/shared/ErrorAlert";
+import { useToast } from "@/components/ui/use-toast";
 
 const TYPE_META = {
   chore_completed: { color: "bg-emerald-500/10 border-emerald-500/20 text-emerald-700", dot: "bg-emerald-500", defaultIcon: "✅" },
@@ -102,11 +105,14 @@ function NotificationItem({ notif, people, onMarkRead, onDelete, index }: {
 
 export default function Notifications() {
   const queryClient = useQueryClient();
-  const { data: notifications = [] } = useQuery({
+  const { toast } = useToast();
+  const onMutationError = (error: Error) => toast({ title: "Error", description: error.message, variant: "destructive" });
+
+  const { data: notifications = [], isLoading: isLoadingNotifications, isError: isErrorNotifications, error: notificationsError } = useQuery({
     queryKey: ["notifications"],
     queryFn: () => entities.Notification.list("-created_date", 100) as Promise<Notification[]>,
   });
-  const { data: people = [] } = useQuery({
+  const { data: people = [], isLoading: isLoadingPeople, isError: isErrorPeople, error: peopleError } = useQuery({
     queryKey: ["people"],
     queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]>,
   });
@@ -119,6 +125,7 @@ export default function Notifications() {
     },
     onError: (error, variables) => {
       if (import.meta.env.DEV) console.error('[Notifications] mark read failed', { notificationId: variables.id, error });
+      onMutationError(error);
     },
   });
   const deleteMutation = useMutation({
@@ -129,15 +136,9 @@ export default function Notifications() {
     },
     onError: (error, id) => {
       if (import.meta.env.DEV) console.error('[Notifications] delete failed', { notificationId: id, error });
+      onMutationError(error);
     },
   });
-
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  const markAllRead = async () => {
-    const unread = notifications.filter(n => !n.read);
-    await Promise.all(unread.map(n => updateMutation.mutateAsync({ id: n.id, data: { read: true } })));
-  };
 
   const grouped = useMemo(() => {
     const today = formatDate(new Date());
@@ -151,6 +152,17 @@ export default function Notifications() {
     });
     return groups;
   }, [notifications]);
+
+  if (isLoadingNotifications || isLoadingPeople) return <LoadingSpinner />;
+  if (isErrorNotifications) return <ErrorAlert error={notificationsError as Error} />;
+  if (isErrorPeople) return <ErrorAlert error={peopleError as Error} />;
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const markAllRead = async () => {
+    const unread = notifications.filter(n => !n.read);
+    await Promise.all(unread.map(n => updateMutation.mutateAsync({ id: n.id, data: { read: true } })));
+  };
 
   return (
     <div className="space-y-8">
