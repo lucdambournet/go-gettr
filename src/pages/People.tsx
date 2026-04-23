@@ -7,28 +7,33 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Plus, Users, UserPlus } from "lucide-react";
 import EmptyState from "@/components/shared/EmptyState";
+import { ErrorAlert } from "@/components/shared/ErrorAlert";
 import PersonDialog from "@/components/people/PersonDialog";
 import PersonContactCard from "@/components/people/PersonContactCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { getWeekStart, getWeekDays, formatDate, choreWeekStats } from "@/components/shared/weekUtils";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function People() {
   const { isParent, family } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
   const [editProfile, setEditProfile] = useState<Profile | null>(null);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const weekStart = getWeekStart();
   const weekDays = getWeekDays(weekStart);
   const weekStartStr = formatDate(weekStart);
 
-  const { data: people = [], isLoading } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
+  const { data: people = [], isLoading, isError, error } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() as unknown as Promise<Profile[]> });
   const { data: chores = [] } = useQuery({ queryKey: ["chores"], queryFn: () => entities.Chore.list() as Promise<Chore[]> });
   const { data: logs = [] } = useQuery({
     queryKey: ["choreLogs", weekStartStr],
     queryFn: () => entities.ChoreLog.filter({ week_start: weekStartStr }) as Promise<ChoreLog[]>,
   });
   const { data: streaks = [] } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list() as Promise<Streak[]> });
+
+  const onMutationError = (error: Error) => toast({ title: "Error", description: error.message, variant: "destructive" });
 
   const createMutation = useMutation({
     mutationFn: (data: Partial<Profile>) => {
@@ -42,6 +47,7 @@ export default function People() {
     },
     onError: (error) => {
       if (import.meta.env.DEV) console.error('[People] create person failed', { error });
+      onMutationError(error);
     },
   });
   const updateMutation = useMutation({
@@ -56,6 +62,7 @@ export default function People() {
     },
     onError: (error) => {
       if (import.meta.env.DEV) console.error('[People] update person failed', { error });
+      onMutationError(error);
     },
   });
   const deleteMutation = useMutation({
@@ -70,6 +77,7 @@ export default function People() {
     },
     onError: (error) => {
       if (import.meta.env.DEV) console.error('[People] delete person failed', { error });
+      onMutationError(error);
     },
   });
 
@@ -120,6 +128,7 @@ export default function People() {
         className="w-7 h-7 border-[3px] border-primary border-t-transparent rounded-full" />
     </div>
   );
+  if (isError) return <ErrorAlert error={error} />;
 
   return (
     <div className="space-y-8">
