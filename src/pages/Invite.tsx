@@ -25,7 +25,13 @@ export default function Invite() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!token) { setStep('invalid'); return; }
+    if (!token) {
+      if (import.meta.env.DEV) console.warn('[Invite] no invite token found in URL params');
+      setStep('invalid');
+      return;
+    }
+
+    if (import.meta.env.DEV) console.log('[Invite] invite token found — starting invitation lookup', { token });
 
     supabase
       .from('family_invitations')
@@ -34,8 +40,13 @@ export default function Invite() {
       .eq('status', 'pending')
       .maybeSingle()
       .then(({ data }) => {
-        if (!data) { setStep('invalid'); return; }
+        if (!data) {
+          if (import.meta.env.DEV) console.warn('[Invite] invitation lookup failed — token invalid or expired', { token });
+          setStep('invalid');
+          return;
+        }
         const { families: fam, ...invite } = data;
+        if (import.meta.env.DEV) console.log('[Invite] invitation lookup success', { inviteId: invite.id, role: invite.role, familyId: (fam as Family | null)?.id });
         setInvitation(invite as FamilyInvitation);
         setFamily(fam as Family);
         setStep('form');
@@ -56,29 +67,36 @@ export default function Invite() {
   const handleEmailJoin = async () => {
     if (!validateForm()) return;
     if (!password || password.length < 6) {
+      if (import.meta.env.DEV) console.warn('[Invite] form validation failed — password too short');
       setError('Password must be at least 6 characters.');
       return;
     }
+    if (import.meta.env.DEV) console.log('[Invite] auth method chosen: email/password', { email: invitation?.email });
     setError('');
     setLoading(true);
     inviteStorage.save(token, { firstName: firstName.trim(), lastName: lastName.trim() });
+    if (import.meta.env.DEV) console.log('[Invite] profile creation on invite acceptance — signing up with email', { email: invitation?.email });
     const { error: err } = await supabase.auth.signUp({
       email: invitation!.email,
       password,
     });
     if (err) {
+      if (import.meta.env.DEV) console.error('[Invite] email sign-up failed', { error: err });
       inviteStorage.clear();
       setError(err.message);
       setLoading(false);
       return;
     }
+    if (import.meta.env.DEV) console.log('[Invite] email sign-up success — awaiting profile creation via AuthContext');
     setStep('done');
   };
 
   const handleGoogleJoin = () => {
     if (!validateForm()) return;
+    if (import.meta.env.DEV) console.log('[Invite] auth method chosen: Google OAuth', { email: invitation?.email });
     setError('');
     inviteStorage.save(token, { firstName: firstName.trim(), lastName: lastName.trim() });
+    if (import.meta.env.DEV) console.log('[Invite] profile creation on invite acceptance — redirecting to Google OAuth');
     supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin },
