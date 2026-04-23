@@ -21,7 +21,7 @@ export default function FamilyMemberList() {
   const { data: members = [] } = useQuery({
     queryKey: ['family-profiles', family?.id],
     enabled: !!family?.id,
-    queryFn: () => entities.Profile.filter({ family_id: family!.id }) as Promise<Profile[]>,
+    queryFn: () => entities.Profile.filter({ family_id: family!.id }) as unknown as Promise<Profile[]>,
   });
 
   const { data: pendingInvites = [] } = useQuery({
