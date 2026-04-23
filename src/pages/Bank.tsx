@@ -13,6 +13,9 @@ import AnimatedNumber from "@/components/shared/AnimatedNumber";
 import { formatDate } from "@/components/shared/weekUtils";
 import { cn } from "@/lib/utils";
 import { soundCashOut, soundPaid } from "@/lib/useSound";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { ErrorAlert } from "@/components/shared/ErrorAlert";
+import { useToast } from "@/components/ui/use-toast";
 
 // ── Currency denomination layout ──────────────────────────────────────────────
 
@@ -592,13 +595,25 @@ function StatsBar({ kids, streakMap, payouts }) {
 
 export default function Bank() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [cashingOutId, setCashingOutId] = useState(null);
   // burstState: { personId, pieces } | null
   const [burstState, setBurstState] = useState(null);
 
-  const { data: people = [] } = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() });
-  const { data: streaks = [] } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list(), refetchInterval: 1000 });
-  const { data: payouts = [] } = useQuery({ queryKey: ["payouts"], queryFn: () => entities.Payout.list(), refetchInterval: 1000 });
+  const peopleQuery = useQuery({ queryKey: ["people"], queryFn: () => entities.Profile.list() });
+  const streaksQuery = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list(), refetchInterval: 1000 });
+  const payoutsQuery = useQuery({ queryKey: ["payouts"], queryFn: () => entities.Payout.list(), refetchInterval: 1000 });
+
+  const people = peopleQuery.data ?? [];
+  const streaks = streaksQuery.data ?? [];
+  const payouts = payoutsQuery.data ?? [];
+
+  const isLoading = peopleQuery.isLoading || streaksQuery.isLoading || payoutsQuery.isLoading;
+  const isError = peopleQuery.isError || streaksQuery.isError || payoutsQuery.isError;
+  const error = peopleQuery.error ?? streaksQuery.error ?? payoutsQuery.error;
+  const streakMap = useMemo(() => Object.fromEntries(streaks.map(s => [s.profile_id, s])), [streaks]);
+
+  const onMutationError = (err) => toast({ title: "Error", description: err.message, variant: "destructive" });
 
   const createPayoutMutation = useMutation({
     mutationFn: (data) => entities.Payout.create(data),
@@ -608,6 +623,7 @@ export default function Bank() {
     },
     onError: (error) => {
       if (import.meta.env.DEV) console.error('[Bank] createPayout failed', { error });
+      onMutationError(error);
     },
   });
   const updatePayoutMutation = useMutation({
@@ -618,13 +634,16 @@ export default function Bank() {
     },
     onError: (error) => {
       if (import.meta.env.DEV) console.error('[Bank] updatePayout failed', { error });
+      onMutationError(error);
     },
   });
+
+  if (isLoading) return <LoadingSpinner />;
+  if (isError) return <ErrorAlert error={error} />;
 
   const activePeople = people.filter(p => p.active !== false);
   const kids = activePeople.filter(p => !p.is_parent);
   const parents = activePeople.filter(p => p.is_parent);
-  const streakMap = useMemo(() => Object.fromEntries(streaks.map(s => [s.profile_id, s])), [streaks]);
 
   const getKidFinancials = (person) => {
     const earned = streakMap[person.id]?.total_rewards_earned || 0;
