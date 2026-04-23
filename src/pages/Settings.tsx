@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Palette, RotateCcw, Check, Sparkles, Plus, Trash2, X, Bell, DollarSign, Globe, LogOut, Users, UserPlus, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/AuthContext";
-import { supabase } from "@/lib/supabase";
+import { entities } from "@/api/entities";
 import { useQueryClient } from "@tanstack/react-query";
 import FamilyMemberList from "@/components/family/FamilyMemberList";
 import InviteDialog from "@/components/family/InviteDialog";
@@ -342,7 +342,7 @@ export default function Settings() {
   const saveFamilyName = useCallback(async () => {
     if (!family || !familyNameInput.trim()) return;
     setSavingFamilyName(true);
-    await supabase.from('families').update({ name: familyNameInput.trim() }).eq('id', family.id);
+    await entities.Family.update(family.id, { name: familyNameInput.trim() });
     await Promise.all([
       refreshProfile(),
       queryClient.invalidateQueries({ queryKey: ['family-profiles', family.id] }),
