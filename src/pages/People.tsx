@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useState } from "react";
 import { entities } from "@/api/entities";
 import { type Profile, type Chore, type ChoreLog, type Streak } from "@/types/entities";
@@ -31,17 +31,61 @@ export default function People() {
   const { data: streaks = [] } = useQuery({ queryKey: ["streaks"], queryFn: () => entities.Streak.list() as Promise<Streak[]> });
 
   const createMutation = useMutation({
-    mutationFn: (data: Partial<Profile>) => entities.Profile.create({ ...data, family_id: family?.id }) as unknown as Promise<Profile>,
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["people"] }); setAddOpen(false); },
+    mutationFn: (data: Partial<Profile>) => {
+      if (import.meta.env.DEV) console.log('[People] creating person', { name: data.first_name, role: data.role });
+      return entities.Profile.create({ ...data, family_id: family?.id }) as unknown as Promise<Profile>;
+    },
+    onSuccess: () => {
+      if (import.meta.env.DEV) console.log('[People] person created successfully');
+      queryClient.invalidateQueries({ queryKey: ["people"] });
+      setAddOpen(false);
+    },
+    onError: (error) => {
+      if (import.meta.env.DEV) console.error('[People] create person failed', { error });
+    },
   });
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Profile> }) => entities.Profile.update(id, data) as unknown as Promise<Profile>,
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["people"] }); setEditProfile(null); },
+    mutationFn: ({ id, data }: { id: string; data: Partial<Profile> }) => {
+      if (import.meta.env.DEV) console.log('[People] updating person', { profileId: id, changes: data });
+      return entities.Profile.update(id, data) as unknown as Promise<Profile>;
+    },
+    onSuccess: () => {
+      if (import.meta.env.DEV) console.log('[People] person updated successfully');
+      queryClient.invalidateQueries({ queryKey: ["people"] });
+      setEditProfile(null);
+    },
+    onError: (error) => {
+      if (import.meta.env.DEV) console.error('[People] update person failed', { error });
+    },
   });
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => entities.Profile.delete(id) as unknown as Promise<void>,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["people"] }),
+    mutationFn: (id: string) => {
+      const person = people.find((p) => p.id === id);
+      if (import.meta.env.DEV) console.log('[People] deleting person', { profileId: id, name: person?.first_name });
+      return entities.Profile.delete(id) as unknown as Promise<void>;
+    },
+    onSuccess: () => {
+      if (import.meta.env.DEV) console.log('[People] person deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ["people"] });
+    },
+    onError: (error) => {
+      if (import.meta.env.DEV) console.error('[People] delete person failed', { error });
+    },
   });
+
+  useEffect(() => {
+    if (import.meta.env.DEV && !isParent) console.log('[People] isParent gate enforced: read-only view for non-parent');
+  }, [isParent]);
+
+  const handleOpenAdd = () => {
+    if (import.meta.env.DEV) console.log('[People] add person dialog opened');
+    setAddOpen(true);
+  };
+
+  const handleEditPerson = (person: Profile) => {
+    if (import.meta.env.DEV) console.log('[People] edit person dialog opened', { profileId: person.id, name: person.name });
+    setEditProfile(person);
+  };
 
   const activePeople = people.filter((p) => p.active !== false);
   const activeChores = chores.filter((c) => c.active !== false);
@@ -95,7 +139,7 @@ export default function People() {
             </div>
             {isParent && (
               <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.94 }}>
-                <Button className="gap-2 rounded-xl shadow-lg shadow-primary/20 font-semibold h-10" onClick={() => setAddOpen(true)}>
+                <Button className="gap-2 rounded-xl shadow-lg shadow-primary/20 font-semibold h-10" onClick={handleOpenAdd}>
                   <motion.span animate={addOpen ? { rotate: 45 } : { rotate: 0 }} transition={{ type: "spring", stiffness: 300 }} className="flex">
                     <Plus className="w-4 h-4" />
                   </motion.span>
@@ -125,7 +169,7 @@ export default function People() {
               title="No people yet"
               description="Add people to your group to start assigning chores."
               action={isParent ? (
-                <Button className="gap-2 mt-2" onClick={() => setAddOpen(true)}>
+                <Button className="gap-2 mt-2" onClick={handleOpenAdd}>
                   <UserPlus className="w-4 h-4" /> Add your first person
                 </Button>
               ) : undefined}
@@ -141,7 +185,7 @@ export default function People() {
                   person={person}
                   index={i}
                   chores={activeChores.filter((c) => c.assigned_to === person.id)}
-                  onEdit={isParent ? () => setEditProfile(person) : undefined}
+                  onEdit={isParent ? () => handleEditPerson(person) : undefined}
                   onDelete={isParent ? () => deleteMutation.mutate(person.id) : undefined}
                   weeklyStats={weeklyStatsMap[person.id]}
                   streakData={streakMap[person.id] ?? null}
