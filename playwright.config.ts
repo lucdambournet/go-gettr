@@ -73,6 +73,6 @@ export default defineConfig({
   webServer: {
     command: 'VITE_E2E_MOCK_AUTH=true npm run dev',
     url: 'http://localhost:5173',
-    reuseExistingServer: false,
+    reuseExistingServer: true,
   },
 });

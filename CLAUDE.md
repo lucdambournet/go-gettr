@@ -52,3 +52,47 @@ VITE_APP_ICON=               # optional — URL to app icon
 **Theme:** CSS variables driven. `Settings.tsx` lets users modify theme tokens at runtime; `src/lib/applyStoredTheme.ts` restores them on load.
 
 **App manifest:** `useAppManifest` reads `VITE_APP_NAME` / `VITE_APP_ICON` env vars; used in `AppLayout` header/logo.
+
+## Pages
+
+| Route | File | Notes |
+|---|---|---|
+| `/` | `src/pages/Landing.tsx` | Public marketing landing page; login slide panel built-in |
+| `/login` | `src/pages/Login.tsx` | Standalone auth page (kept for direct link compat) |
+| `/invite` | `src/pages/Invite.tsx` | Invite token capture → OAuth redirect |
+| `/family/setup` | `src/pages/FamilySetup.tsx` | 4-step wizard (parent → family → spouse → kids → chores) |
+| `/Dashboard` | `src/pages/Dashboard.tsx` | Stats, streak leaderboard, achievements summary |
+| `/Daily` | `src/pages/Daily.tsx` | Today's chore checklist with optimistic toggle |
+| `/People` | `src/pages/People.tsx` | Family member CRUD |
+| `/Chores` | `src/pages/Chores.tsx` | Chore management (title, icon, frequency, payout) |
+| `/WeeklyView` | `src/pages/WeeklyView.tsx` | Week-long completion grid |
+| `/CheckIn` | `src/pages/CheckIn.tsx` | Streak check-in + reward multiplier display |
+| `/Bank` | `src/pages/Bank.tsx` | Payout management with visual money display |
+| `/Notifications` | `src/pages/Notifications.tsx` | Notification history |
+| `/Settings` | `src/pages/Settings.tsx` | Theme token editor + preferences |
+| `/DevPanel` | `src/pages/DevPanel.tsx` | Internal dev tooling |
+
+## Feature map
+
+- **Daily Tasks** — per-person chore checklist, real-time progress bar, optimistic completion toggles
+- **Streaks** — daily check-in, current/longest streak, reward multiplier (0.25 × 1.5^(streak−1))
+- **Family Bank / Payouts** — per-chore payout rates, pending balance, parent-approved payouts
+- **Achievements** — client-computed badges (First Step, On a Roll, Week Warrior, Unstoppable, Legendary, Chore Champion, Perfect Week, Team Effort, Earner)
+- **Weekly View** — 7-day grid by person, completion % per day
+- **People** — parent/child role management, avatar colors, invite by email
+- **Chores** — title, description, icon (picker), frequency (daily/weekly/twice_daily/custom days), payout
+- **Notifications** — chore_completed, payout_approved, streak_broken, achievement_unlocked events
+- **Settings** — live CSS variable editing, dark mode, theme persistence
+
+## Domain model (Supabase tables)
+
+`profiles` · `families` · `family_invitations` · `chore` · `chore_log` · `streak` · `payout` · `notification` · `achievement`
+
+Profile roles: `parent | child`. RLS enabled on all tables; parents can manage other family members.
+
+## Design tokens
+
+- **Primary:** indigo `hsl(245 58% 51%)`
+- **Accent:** amber `hsl(33 90% 55%)`
+- **Background:** light blue-gray `hsl(225 20% 97%)`
+- **Fonts:** Inter (body), Nunito (headings, `font-nunito`), Syne (display, `font-syne`)

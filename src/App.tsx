@@ -20,6 +20,7 @@ import DevPanel from '@/pages/DevPanel';
 import Login from '@/pages/Login';
 import Invite from '@/pages/Invite';
 import FamilySetup from '@/pages/FamilySetup';
+import Landing from '@/pages/Landing';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingProfile, isLoadingPublicSettings, authError, user, profile } = useAuth();
@@ -73,6 +74,7 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <Routes>
+            <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/invite" element={<Invite />} />
             <Route path="/*" element={<AuthenticatedApp />} />

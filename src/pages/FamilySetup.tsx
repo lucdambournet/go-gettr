@@ -299,7 +299,15 @@ export default function FamilySetup() {
       navigate('/Daily', { replace: true });
     } catch (submitError: unknown) {
       if (import.meta.env.DEV) console.error('[FamilySetup] family creation error', { error: submitError });
-      setError(submitError instanceof Error ? submitError.message : 'Failed to create family.');
+      let message = 'Failed to create family.';
+      if (submitError instanceof Error) {
+        message = submitError.message;
+      } else if (typeof submitError === 'object' && submitError !== null) {
+        const e = submitError as Record<string, unknown>;
+        const parts = [e['message'], e['code'] && `(${e['code']})`, e['details'], e['hint']].filter(Boolean);
+        if (parts.length) message = parts.join(' — ');
+      }
+      setError(message);
     } finally {
       setSaving(false);
     }
