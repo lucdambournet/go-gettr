@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 npm run dev          # Start dev server (http://localhost:5173)
-npm run build        # TypeScript compile + Vite production build
+npm run build        # Vite production build (no type checking — run typecheck separately)
 npm run typecheck    # Type-check without emitting
 npm run lint         # ESLint (quiet — errors only)
 npm run lint:fix     # ESLint with auto-fix
@@ -49,7 +49,7 @@ VITE_APP_ICON=               # optional — URL to app icon
 
 **Layout (`src/components/layout/AppLayout.tsx`):** Animated sidebar (Framer Motion) that collapses to icon-only mode. Nav items use custom SVG icon components (active/inactive states). Sidebar shifts main content via `marginLeft` animation. Mobile uses a full-screen overlay drawer.
 
-**Theme:** CSS variables driven. `Settings.tsx` lets users modify theme tokens at runtime; `src/lib/applyStoredTheme.ts` restores them on load.
+**Theme:** CSS variables driven; light/dark variants defined in `src/index.css`. `src/lib/applyStoredTheme.ts` applies the stored `light`/`dark` preference (localStorage key `theme`) before first render.
 
 **App manifest:** `useAppManifest` reads `VITE_APP_NAME` / `VITE_APP_ICON` env vars; used in `AppLayout` header/logo.
 
@@ -69,7 +69,7 @@ VITE_APP_ICON=               # optional — URL to app icon
 | `/CheckIn` | `src/pages/CheckIn.tsx` | Streak check-in + reward multiplier display |
 | `/Bank` | `src/pages/Bank.tsx` | Payout management with visual money display |
 | `/Notifications` | `src/pages/Notifications.tsx` | Notification history |
-| `/Settings` | `src/pages/Settings.tsx` | Theme token editor + preferences |
+| `/Settings` | `src/pages/Settings.tsx` | Dark/light mode toggle, currency, notification preferences |
 | `/DevPanel` | `src/pages/DevPanel.tsx` | Internal dev tooling |
 
 ## Feature map
@@ -82,7 +82,7 @@ VITE_APP_ICON=               # optional — URL to app icon
 - **People** — parent/child role management, avatar colors, invite by email
 - **Chores** — title, description, icon (picker), frequency (daily/weekly/twice_daily/custom days), payout
 - **Notifications** — chore_completed, payout_approved, streak_broken, achievement_unlocked events
-- **Settings** — live CSS variable editing, dark mode, theme persistence
+- **Settings** — dark/light mode toggle, currency, notification and app preferences
 
 ## Domain model (Supabase tables)
 

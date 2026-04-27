@@ -17,94 +17,90 @@ import GoogleIcon from '@/components/icons/GoogleIcon';
 
 type AuthMode = 'signin' | 'signup';
 
-// ─── Mini UI mockups for feature illustrations ──────────────────────────────
+// ─── App UI mockups (white cards — look like screenshots on dark bg) ──────────
 
 const DailyMockup = () => (
-  <div className="rounded-2xl bg-white p-4 shadow-md space-y-2.5 text-sm border border-slate-100">
-    <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">Today · Emma</p>
+  <div className="rounded-2xl bg-white p-4 shadow-2xl space-y-2 text-sm border border-slate-100">
+    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2.5">Today · Emma</p>
     {[
       { label: 'Make bed', done: true, emoji: '🛏️' },
       { label: 'Feed the dog', done: true, emoji: '🐶' },
       { label: 'Take out trash', done: false, emoji: '🗑️' },
-      { label: 'Homework check', done: false, emoji: '📚' },
+      { label: 'Homework', done: false, emoji: '📚' },
     ].map(item => (
-      <div key={item.label} className="flex items-center gap-3">
-        <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${item.done ? 'bg-green-500 text-white' : 'border-2 border-slate-200'}`}>
+      <div key={item.label} className="flex items-center gap-2.5">
+        <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 ${item.done ? 'bg-green-500 text-white' : 'border-2 border-slate-200'}`}>
           {item.done && '✓'}
         </div>
-        <span className={`${item.done ? 'line-through text-slate-400' : 'text-slate-700'}`}>{item.emoji} {item.label}</span>
+        <span className={`text-xs ${item.done ? 'line-through text-slate-400' : 'text-slate-700'}`}>{item.emoji} {item.label}</span>
       </div>
     ))}
-    <div className="pt-2 flex items-center gap-2 text-[11px] text-slate-400">
+    <div className="pt-1 flex items-center gap-2 text-[10px] text-slate-400">
       <div className="h-1.5 flex-1 rounded-full bg-slate-100 overflow-hidden">
         <div className="h-full w-1/2 rounded-full bg-green-500" />
       </div>
-      2 / 4 done today
+      2 / 4
     </div>
   </div>
 );
 
 const StreakMockup = () => (
-  <div className="rounded-2xl bg-white p-4 shadow-md border border-slate-100">
-    <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">Streak Board</p>
+  <div className="rounded-2xl bg-white p-4 shadow-2xl border border-slate-100">
+    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2.5">Streak Board</p>
     <div className="space-y-2">
       {[
+        { name: 'Sophie', streak: 21, color: 'bg-amber-100 text-amber-700' },
         { name: 'Emma', streak: 14, color: 'bg-indigo-100 text-indigo-700' },
         { name: 'Liam', streak: 7, color: 'bg-pink-100 text-pink-700' },
-        { name: 'Sophie', streak: 21, color: 'bg-amber-100 text-amber-700' },
       ].map((p, i) => (
-        <div key={p.name} className="flex items-center gap-3">
-          <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black bg-slate-100 text-slate-500">{i + 1}</div>
-          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black ${p.color}`}>{p.name[0]}</div>
-          <span className="flex-1 text-sm font-medium text-slate-700">{p.name}</span>
-          <div className="flex items-center gap-1 text-sm font-black text-amber-500">🔥 {p.streak}</div>
+        <div key={p.name} className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black bg-slate-100 text-slate-500">{i + 1}</div>
+          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${p.color}`}>{p.name[0]}</div>
+          <span className="flex-1 text-xs font-medium text-slate-700">{p.name}</span>
+          <span className="text-xs font-black text-amber-500">🔥 {p.streak}</span>
         </div>
       ))}
     </div>
-    <div className="mt-3 rounded-xl bg-amber-50 border border-amber-100 p-2.5 text-[11px] text-amber-700 font-medium">
-      Sophie's on a 21-day streak! 🏆 +$2.63 bonus
+    <div className="mt-2.5 rounded-xl bg-amber-50 border border-amber-100 p-2 text-[10px] text-amber-700 font-medium">
+      +$2.63 streak bonus unlocked! 🏆
     </div>
   </div>
 );
 
 const BankMockup = () => (
-  <div className="rounded-2xl bg-white p-4 shadow-md border border-slate-100 space-y-3">
-    <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Family Bank</p>
+  <div className="rounded-2xl bg-white p-4 shadow-2xl border border-slate-100 space-y-2.5">
+    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Family Bank</p>
     {[
-      { name: 'Emma', amount: '$12.75', pending: '$4.75', color: 'bg-indigo-100 text-indigo-700' },
-      { name: 'Liam', amount: '$8.50', pending: '$3.50', color: 'bg-pink-100 text-pink-700' },
+      { name: 'Emma', amount: '$12.75', color: 'bg-indigo-100 text-indigo-700' },
+      { name: 'Liam', amount: '$8.50', color: 'bg-pink-100 text-pink-700' },
     ].map(item => (
-      <div key={item.name} className="flex items-center gap-3">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black ${item.color}`}>{item.name[0]}</div>
-        <div className="flex-1">
-          <div className="text-sm font-semibold text-slate-700">{item.name}</div>
-          <div className="text-[11px] text-slate-400">{item.pending} pending payout</div>
-        </div>
-        <div className="text-sm font-black text-green-600">{item.amount}</div>
+      <div key={item.name} className="flex items-center gap-2.5">
+        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black ${item.color}`}>{item.name[0]}</div>
+        <span className="flex-1 text-sm font-semibold text-slate-700">{item.name}</span>
+        <span className="text-sm font-black text-green-600">{item.amount}</span>
       </div>
     ))}
-    <div className="flex items-center gap-2 pt-1">
-      <div className="flex-1 h-7 rounded-xl bg-green-500 flex items-center justify-center text-xs font-bold text-white">Pay Out</div>
-      <div className="flex-1 h-7 rounded-xl border border-slate-200 flex items-center justify-center text-xs font-semibold text-slate-500">History</div>
+    <div className="h-7 rounded-xl bg-green-500 flex items-center justify-center text-xs font-bold text-white">
+      Approve Payout
     </div>
   </div>
 );
 
 const AchievementMockup = () => (
-  <div className="rounded-2xl bg-white p-4 shadow-md border border-slate-100">
-    <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">Achievements Unlocked</p>
-    <div className="grid grid-cols-3 gap-2">
+  <div className="rounded-2xl bg-white p-4 shadow-2xl border border-slate-100">
+    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2.5">Achievements</p>
+    <div className="grid grid-cols-3 gap-1.5">
       {[
         { emoji: '⭐', label: 'First Step', unlocked: true },
         { emoji: '🔥', label: 'On a Roll', unlocked: true },
-        { emoji: '🏆', label: 'Week Warrior', unlocked: true },
+        { emoji: '🏆', label: 'Warrior', unlocked: true },
         { emoji: '⚡', label: 'Unstoppable', unlocked: false },
         { emoji: '👑', label: 'Legendary', unlocked: false },
-        { emoji: '💎', label: 'Perfect Week', unlocked: false },
+        { emoji: '💎', label: 'Perfect', unlocked: false },
       ].map(a => (
-        <div key={a.label} className={`rounded-xl p-2 text-center transition-all ${a.unlocked ? 'bg-amber-50 border border-amber-100' : 'bg-slate-50 opacity-40 grayscale'}`}>
-          <div className="text-xl">{a.emoji}</div>
-          <div className="text-[10px] text-slate-500 mt-0.5 leading-tight font-medium">{a.label}</div>
+        <div key={a.label} className={`rounded-xl p-1.5 text-center ${a.unlocked ? 'bg-amber-50 border border-amber-100' : 'bg-slate-50 opacity-40 grayscale'}`}>
+          <div className="text-base">{a.emoji}</div>
+          <div className="text-[9px] text-slate-500 mt-0.5 leading-tight font-medium">{a.label}</div>
         </div>
       ))}
     </div>
@@ -112,24 +108,22 @@ const AchievementMockup = () => (
 );
 
 const WeeklyMockup = () => (
-  <div className="rounded-2xl bg-white p-4 shadow-md border border-slate-100">
-    <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">This Week · All Kids</p>
-    <div className="space-y-2">
+  <div className="rounded-2xl bg-white p-4 shadow-2xl border border-slate-100">
+    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2.5">This Week</p>
+    <div className="space-y-1.5">
       {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => {
         const vals = [5, 4, 5, 3, 4, 2, 1];
-        const max = 5;
-        const done = vals[i];
-        const pct = Math.round((done / max) * 100);
+        const pct = Math.round((vals[i] / 5) * 100);
         return (
-          <div key={day} className="flex items-center gap-3 text-xs">
-            <span className="w-7 text-slate-400 font-medium">{day}</span>
-            <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+          <div key={day} className="flex items-center gap-2 text-xs">
+            <span className="w-6 text-[10px] text-slate-400 font-medium">{day}</span>
+            <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
               <div
                 className={`h-full rounded-full ${pct === 100 ? 'bg-green-500' : pct >= 60 ? 'bg-indigo-400' : 'bg-amber-400'}`}
                 style={{ width: `${pct}%` }}
               />
             </div>
-            <span className="text-slate-400">{done}/{max}</span>
+            <span className="text-[10px] text-slate-400">{vals[i]}/5</span>
           </div>
         );
       })}
@@ -138,92 +132,24 @@ const WeeklyMockup = () => (
 );
 
 const FamilyMockup = () => (
-  <div className="rounded-2xl bg-white p-4 shadow-md border border-slate-100 space-y-3">
-    <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Your Family</p>
+  <div className="rounded-2xl bg-white p-4 shadow-2xl border border-slate-100 space-y-2">
+    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Your Family</p>
     {[
-      { name: 'Sarah (you)', role: 'Parent', color: 'bg-indigo-500', extra: 'Manages chores & payouts' },
-      { name: 'Jake', role: 'Parent', color: 'bg-violet-500', extra: 'Co-admin access' },
-      { name: 'Emma', role: 'Child · Age 10', color: 'bg-pink-400', extra: '$5 / week allowance' },
-      { name: 'Liam', role: 'Child · Age 8', color: 'bg-amber-400', extra: '$4 / week allowance' },
+      { name: 'Sarah', role: 'Parent', color: 'bg-indigo-500' },
+      { name: 'Jake', role: 'Parent', color: 'bg-violet-500' },
+      { name: 'Emma', role: 'Child', color: 'bg-pink-400' },
+      { name: 'Liam', role: 'Child', color: 'bg-amber-400' },
     ].map(p => (
-      <div key={p.name} className="flex items-center gap-3">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white flex-shrink-0 ${p.color}`}>{p.name[0]}</div>
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold text-slate-700 truncate">{p.name}</div>
-          <div className="text-[10px] text-slate-400 truncate">{p.extra}</div>
-        </div>
-        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${p.role.startsWith('Parent') ? 'bg-indigo-50 text-indigo-600' : 'bg-green-50 text-green-600'}`}>{p.role.split('·')[0].trim()}</span>
+      <div key={p.name} className="flex items-center gap-2.5">
+        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white ${p.color}`}>{p.name[0]}</div>
+        <span className="flex-1 text-sm font-semibold text-slate-700">{p.name}</span>
+        <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${p.role === 'Parent' ? 'bg-indigo-50 text-indigo-600' : 'bg-green-50 text-green-600'}`}>{p.role}</span>
       </div>
     ))}
   </div>
 );
 
-// ─── Feature card data ───────────────────────────────────────────────────────
-
-const features = [
-  {
-    id: 'daily',
-    tag: 'Daily Tasks',
-    title: 'Every chore, every day — nothing slips.',
-    desc: 'A clean checklist for each family member shows exactly what needs doing today. One tap marks it done, with instant progress tracking.',
-    mockup: <DailyMockup />,
-    accent: 'from-green-50 to-emerald-50',
-    dot: 'bg-green-500',
-  },
-  {
-    id: 'streaks',
-    tag: 'Streaks & Check-ins',
-    title: 'Habits that stick — powered by fire.',
-    desc: 'Kids build daily streaks that unlock reward multipliers. The longer the streak, the bigger the bonus. Breaking it stings just enough to care.',
-    mockup: <StreakMockup />,
-    accent: 'from-amber-50 to-orange-50',
-    dot: 'bg-amber-500',
-  },
-  {
-    id: 'bank',
-    tag: 'Family Bank',
-    title: 'Real allowances, earned the right way.',
-    desc: 'Every completed chore adds to a child\'s balance. Parents approve payouts with one click. Kids see exactly what they\'ve earned — and what they\'re owed.',
-    mockup: <BankMockup />,
-    accent: 'from-emerald-50 to-teal-50',
-    dot: 'bg-emerald-500',
-  },
-  {
-    id: 'achievements',
-    tag: 'Achievements',
-    title: 'Badges that make consistency feel epic.',
-    desc: 'From "First Step" to "Legendary", every milestone is recognized. Achievements unlock automatically as kids hit streaks, perfect weeks, and earning goals.',
-    mockup: <AchievementMockup />,
-    accent: 'from-yellow-50 to-amber-50',
-    dot: 'bg-yellow-500',
-  },
-  {
-    id: 'weekly',
-    tag: 'Weekly View',
-    title: 'The full picture at a glance.',
-    desc: 'A week-at-a-view layout shows completion rates by day and by child. Spot patterns, celebrate wins, and address slumps before they become habits.',
-    mockup: <WeeklyMockup />,
-    accent: 'from-purple-50 to-indigo-50',
-    dot: 'bg-purple-500',
-  },
-  {
-    id: 'family',
-    tag: 'Family Management',
-    title: 'Your household, exactly how you run it.',
-    desc: 'Invite a co-parent, add kids with Google accounts or simple usernames, set individual allowances, and manage everything from one parent dashboard.',
-    mockup: <FamilyMockup />,
-    accent: 'from-indigo-50 to-blue-50',
-    dot: 'bg-indigo-500',
-  },
-];
-
-const steps = [
-  { n: '01', title: 'Create your family', desc: 'Sign up, name your family, and invite a co-parent in minutes. Your setup draft saves automatically — even if you bounce away mid-flow.' },
-  { n: '02', title: 'Add kids & assign chores', desc: 'Create child accounts with Google or a simple username. Assign chores with frequencies, icons, and a payout per completion.' },
-  { n: '03', title: 'Check in every day', desc: 'Kids tick off chores, build streaks, earn badges, and watch their balance grow. Parents approve payouts whenever they\'re ready.' },
-];
-
-// ─── Login slide panel ───────────────────────────────────────────────────────
+// ─── Login slide panel (unchanged logic) ──────────────────────────────────────
 
 interface LoginPanelProps {
   onClose: () => void;
@@ -279,26 +205,23 @@ function LoginPanel({ onClose }: LoginPanelProps) {
   };
 
   return (
-    <>
-      {/* Backdrop */}
-      <motion.div
-        key="backdrop"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Panel */}
+    <motion.div
+      key="backdrop"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4"
+      onClick={onClose}
+    >
       <motion.div
         key="panel"
-        initial={{ x: '100%' }}
-        animate={{ x: 0 }}
-        exit={{ x: '100%' }}
-        transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-        className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md bg-card shadow-2xl overflow-y-auto flex flex-col"
+        initial={{ opacity: 0, scale: 0.96, y: 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 16 }}
+        transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+        className="w-full max-w-md bg-card shadow-2xl overflow-y-auto flex flex-col rounded-2xl max-h-[90dvh]"
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-border/60">
           <div>
@@ -313,9 +236,7 @@ function LoginPanel({ onClose }: LoginPanelProps) {
             <X size={18} />
           </button>
         </div>
-
         <div className="flex-1 px-6 py-6 space-y-5">
-          {/* Mode toggle */}
           <div className="flex rounded-2xl border border-border p-1">
             {(['signup', 'signin'] as AuthMode[]).map(m => (
               <button
@@ -328,67 +249,110 @@ function LoginPanel({ onClose }: LoginPanelProps) {
               </button>
             ))}
           </div>
-
-          {/* Google */}
           <Button type="button" variant="outline" onClick={handleGoogle} className="h-12 w-full justify-center gap-3 rounded-2xl text-sm font-semibold">
             <GoogleIcon />
             Continue with Google
           </Button>
-
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
             <span className="text-xs uppercase tracking-widest text-muted-foreground">or</span>
             <div className="h-px flex-1 bg-border" />
           </div>
-
-          {/* Username / Password */}
           <div className="space-y-3">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground">Username</label>
-              <Input
-                aria-label="Username"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                placeholder="jane-parent"
-                autoComplete="username"
-                className="h-12 rounded-2xl"
-              />
+              <Input aria-label="Username" value={username} onChange={e => setUsername(e.target.value)} placeholder="jane-parent" autoComplete="username" className="h-12 rounded-2xl" />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground">Password</label>
-              <Input
-                aria-label="Password"
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                className="h-12 rounded-2xl"
-              />
+              <Input aria-label="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSubmit()} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} className="h-12 rounded-2xl" />
             </div>
           </div>
-
           {error && <p className="text-sm text-destructive">{error}</p>}
-
           <Button type="button" onClick={handleSubmit} disabled={loading} className="h-12 w-full rounded-2xl text-sm font-semibold">
             {loading ? 'Working…' : mode === 'signup' ? 'Create account' : 'Sign in'}
           </Button>
-
           <p className="text-center text-xs text-muted-foreground leading-relaxed">
             After signing in you'll walk through a quick family setup — takes about 2 minutes.
           </p>
         </div>
       </motion.div>
-    </>
+    </motion.div>
   );
 }
 
-// ─── Main landing page ───────────────────────────────────────────────────────
+// ─── Data ─────────────────────────────────────────────────────────────────────
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+const bentoFeatures = [
+  {
+    tag: 'Daily Tasks',
+    title: 'Every chore tracked, nothing missed.',
+    desc: 'Per-person checklists with real-time progress.',
+    mockup: <DailyMockup />,
+    accent: '#22c55e',
+    colSpan: 'lg:col-span-2',
+  },
+  {
+    tag: 'Streaks',
+    title: 'Habits powered by fire.',
+    desc: 'Daily streaks that multiply earnings.',
+    mockup: <StreakMockup />,
+    accent: '#f59e0b',
+    colSpan: 'lg:col-span-1',
+  },
+  {
+    tag: 'Family Bank',
+    title: 'Real money, really earned.',
+    desc: 'Parent-approved payouts, transparent balances.',
+    mockup: <BankMockup />,
+    accent: '#6366f1',
+    colSpan: 'lg:col-span-1',
+  },
+  {
+    tag: 'Achievements',
+    title: 'Every milestone celebrated.',
+    desc: 'Badges unlock as kids hit goals.',
+    mockup: <AchievementMockup />,
+    accent: '#f59e0b',
+    colSpan: 'lg:col-span-2',
+  },
+  {
+    tag: 'Weekly View',
+    title: 'Patterns you can actually see.',
+    desc: 'Seven-day grid shows wins and slumps at a glance.',
+    mockup: <WeeklyMockup />,
+    accent: '#a78bfa',
+    colSpan: 'lg:col-span-2',
+  },
+  {
+    tag: 'Family Hub',
+    title: 'Your whole household, one place.',
+    desc: 'Co-parents, kids, roles — managed together.',
+    mockup: <FamilyMockup />,
+    accent: '#6366f1',
+    colSpan: 'lg:col-span-1',
+  },
+];
+
+const steps = [
+  { n: '01', title: 'Create your family', desc: 'Sign up, name your family, and invite a co-parent in minutes. Your draft saves automatically.' },
+  { n: '02', title: 'Assign chores & goals', desc: 'Add kids, set chores with icons and frequencies, assign a payout per completion.' },
+  { n: '03', title: 'Watch streaks grow', desc: 'Kids tick off tasks, build streaks, earn badges, and collect real allowance.' },
+];
+
+// ─── Stagger animation variants ───────────────────────────────────────────────
+
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.09 } },
 };
+
+const slideUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
+};
+
+// ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Landing() {
   const { user, profile, isLoadingAuth } = useAuth();
@@ -399,182 +363,296 @@ export default function Landing() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div style={{ background: '#07091a', color: 'white', fontFamily: 'Inter, sans-serif', overflowX: 'hidden' }}>
 
-      {/* ── Navbar ── */}
-      <header className="fixed top-0 inset-x-0 z-30 border-b border-border/50 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-black text-sm font-nunito">G</div>
-            <span className="font-nunito font-black text-lg text-foreground">GoGettr</span>
+      {/* ── NAVBAR ── */}
+      <header style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
+        background: 'rgba(7,9,26,0.8)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+      }}>
+        <div style={{ maxWidth: '1152px', margin: '0 auto', padding: '0 24px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{
+              width: '32px', height: '32px', borderRadius: '10px',
+              background: 'linear-gradient(135deg, #6366f1, #818cf8)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'Nunito, sans-serif', fontWeight: 900, fontSize: '14px', color: 'white',
+              boxShadow: '0 0 20px rgba(99,102,241,0.6)',
+            }}>G</div>
+            <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 900, fontSize: '18px', letterSpacing: '-0.01em' }}>GoGettr</span>
           </div>
-          <Button
-            onClick={() => setLoginOpen(true)}
-            className="rounded-2xl px-5 h-9 text-sm font-semibold"
-          >
-            Login
-          </Button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button
+              onClick={() => setLoginOpen(true)}
+              style={{
+                padding: '8px 16px', borderRadius: '10px', background: 'transparent',
+                border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)',
+                fontWeight: 600, fontSize: '13px', cursor: 'pointer',
+              }}
+            >
+              Log in
+            </button>
+            <button
+              onClick={() => setLoginOpen(true)}
+              style={{
+                padding: '9px 20px', borderRadius: '10px',
+                background: 'linear-gradient(135deg, #6366f1, #818cf8)',
+                border: 'none', color: 'white',
+                fontWeight: 700, fontSize: '13px', cursor: 'pointer',
+                boxShadow: '0 0 24px rgba(99,102,241,0.45)',
+              }}
+            >
+              Get Started
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden pt-32 pb-24 px-5">
-        {/* Background gradient blobs */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-32 -left-32 w-[600px] h-[600px] rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute top-20 right-0 w-[400px] h-[400px] rounded-full bg-accent/10 blur-3xl" />
+      {/* ── HERO ── */}
+      <section style={{ position: 'relative', minHeight: '100vh', display: 'flex', alignItems: 'center', paddingTop: '80px', overflow: 'hidden' }}>
+        {/* Background atmosphere */}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+          <div style={{
+            position: 'absolute', top: '-15%', left: '-10%',
+            width: '700px', height: '700px', borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 65%)',
+            filter: 'blur(1px)',
+          }} />
+          <div style={{
+            position: 'absolute', bottom: '-5%', right: '-8%',
+            width: '550px', height: '550px', borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 65%)',
+          }} />
+          {/* Dot grid */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.18) 1px, transparent 1px)',
+            backgroundSize: '32px 32px',
+          }} />
         </div>
 
-        <div className="relative mx-auto max-w-4xl text-center">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-            className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-primary mb-8"
-          >
-            Family Chore & Allowance Tracker
-          </motion.div>
+        <div style={{ maxWidth: '1152px', width: '100%', margin: '0 auto', padding: '60px 24px', position: 'relative', zIndex: 1 }}>
+          <div className="flex flex-col lg:flex-row gap-16 items-center">
 
-          <motion.h1
-            initial="hidden"
-            animate="visible"
-            variants={{ ...fadeUp, visible: { ...fadeUp.visible, transition: { duration: 0.55, ease: 'easeOut', delay: 0.08 } } }}
-            className="font-nunito font-black text-5xl sm:text-6xl lg:text-7xl tracking-tight text-foreground leading-[1.05]"
-          >
-            Make chores&nbsp;fun.
-            <br />
-            <span className="text-primary">Keep everyone accountable.</span>
-          </motion.h1>
-
-          <motion.p
-            initial="hidden"
-            animate="visible"
-            variants={{ ...fadeUp, visible: { ...fadeUp.visible, transition: { duration: 0.55, ease: 'easeOut', delay: 0.16 } } }}
-            className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto"
-          >
-            GoGettr turns daily chores into streaks, badges, and real allowance — for every kid in the family. Set it up once and let the system do the rest.
-          </motion.p>
-
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={{ ...fadeUp, visible: { ...fadeUp.visible, transition: { duration: 0.55, ease: 'easeOut', delay: 0.24 } } }}
-            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3"
-          >
-            <Button
-              onClick={() => setLoginOpen(true)}
-              className="h-13 px-8 rounded-2xl text-base font-bold shadow-lg shadow-primary/20"
-              style={{ height: '3.25rem' }}
+            {/* Left — text */}
+            <motion.div
+              className="flex-1"
+              initial="hidden"
+              animate="visible"
+              variants={containerVariants}
+              style={{ maxWidth: '600px' }}
             >
-              Get Started Free
-            </Button>
-            <button
-              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-              className="h-13 px-6 rounded-2xl text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
-              style={{ height: '3.25rem' }}
-            >
-              See how it works ↓
-            </button>
-          </motion.div>
-
-          {/* Hero stats */}
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={{ ...fadeUp, visible: { ...fadeUp.visible, transition: { duration: 0.55, ease: 'easeOut', delay: 0.32 } } }}
-            className="mt-16 flex flex-wrap justify-center gap-8"
-          >
-            {[
-              { value: '10+', label: 'Feature areas' },
-              { value: '∞', label: 'Streak potential' },
-              { value: '$0', label: 'To get started' },
-            ].map(s => (
-              <div key={s.label} className="text-center">
-                <div className="font-nunito font-black text-3xl text-primary">{s.value}</div>
-                <div className="text-xs text-muted-foreground mt-1 font-medium">{s.label}</div>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── How it works ── */}
-      <section className="py-24 px-5 bg-muted/30">
-        <div className="mx-auto max-w-5xl">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-80px' }}
-            variants={fadeUp}
-            className="text-center mb-16"
-          >
-            <p className="text-xs font-bold uppercase tracking-widest text-primary mb-3">How it works</p>
-            <h2 className="font-nunito font-black text-4xl text-foreground">Up and running in minutes</h2>
-          </motion.div>
-
-          <div className="grid sm:grid-cols-3 gap-6">
-            {steps.map((step, i) => (
-              <motion.div
-                key={step.n}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: '-60px' }}
-                variants={{ ...fadeUp, visible: { ...fadeUp.visible, transition: { duration: 0.5, ease: 'easeOut', delay: i * 0.1 } } }}
-                className="rounded-3xl border border-border/70 bg-card p-6 shadow-sm"
-              >
-                <div className="font-syne font-black text-5xl text-primary/15 mb-4 leading-none">{step.n}</div>
-                <h3 className="font-nunito font-black text-lg text-foreground mb-2">{step.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
+              <motion.div variants={slideUp}>
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '7px',
+                  padding: '5px 14px', borderRadius: '999px',
+                  background: 'rgba(99,102,241,0.12)',
+                  border: '1px solid rgba(99,102,241,0.35)',
+                  fontSize: '11px', fontWeight: 700,
+                  textTransform: 'uppercase', letterSpacing: '0.1em',
+                  color: '#a5b4fc', marginBottom: '28px',
+                }}>
+                  <span style={{ fontSize: '14px' }}>✦</span> Free Family Chore Tracker
+                </div>
               </motion.div>
-            ))}
+
+              <motion.h1 variants={slideUp} style={{
+                fontFamily: 'Syne, sans-serif', fontWeight: 900,
+                fontSize: 'clamp(2.8rem, 6vw, 5.5rem)',
+                lineHeight: 1.0, letterSpacing: '-0.03em',
+                marginBottom: '24px',
+              }}>
+                Make chores<br />
+                <span style={{
+                  background: 'linear-gradient(135deg, #818cf8 0%, #c4b5fd 45%, #f59e0b 100%)',
+                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                }}>hit different.</span>
+              </motion.h1>
+
+              <motion.p variants={slideUp} style={{
+                fontSize: '18px', lineHeight: 1.65,
+                color: 'rgba(255,255,255,0.48)',
+                maxWidth: '480px', marginBottom: '40px',
+              }}>
+                Turn daily tasks into streaks, badges, and real allowance. GoGettr keeps every kid accountable — automatically.
+              </motion.p>
+
+              <motion.div variants={slideUp} style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <button
+                  onClick={() => setLoginOpen(true)}
+                  style={{
+                    padding: '14px 30px', borderRadius: '14px',
+                    background: 'linear-gradient(135deg, #6366f1 0%, #818cf8 100%)',
+                    border: 'none', color: 'white',
+                    fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: '16px', cursor: 'pointer',
+                    boxShadow: '0 0 40px rgba(99,102,241,0.5), 0 8px 32px rgba(99,102,241,0.2)',
+                  }}
+                >
+                  Get Started Free →
+                </button>
+                <button
+                  onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                  style={{
+                    padding: '14px 22px', borderRadius: '14px', background: 'transparent',
+                    border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.55)',
+                    fontWeight: 600, fontSize: '14px', cursor: 'pointer',
+                  }}
+                >
+                  See features ↓
+                </button>
+              </motion.div>
+
+              <motion.div variants={slideUp} style={{ display: 'flex', gap: '36px', marginTop: '52px', flexWrap: 'wrap' }}>
+                {[
+                  { value: '$0', label: 'Forever free' },
+                  { value: '∞', label: 'Streak potential' },
+                  { value: '9+', label: 'Badge types' },
+                ].map(s => (
+                  <div key={s.label}>
+                    <div style={{
+                      fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: '2.2rem', lineHeight: 1,
+                      background: 'linear-gradient(135deg, #818cf8, #c4b5fd)',
+                      WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                    }}>{s.value}</div>
+                    <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.38)', marginTop: '4px', fontWeight: 500 }}>{s.label}</div>
+                  </div>
+                ))}
+              </motion.div>
+            </motion.div>
+
+            {/* Right — floating card cluster (desktop only) */}
+            <motion.div
+              className="hidden lg:block flex-1"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.7, delay: 0.35 }}
+              style={{ position: 'relative', height: '440px', minWidth: '360px' }}
+            >
+              <motion.div
+                animate={{ y: [0, -14, 0] }}
+                transition={{ repeat: Infinity, duration: 3.7, ease: 'easeInOut' }}
+                style={{
+                  position: 'absolute', left: 0, top: '50px',
+                  width: '230px',
+                  transform: 'rotate(-4deg)',
+                  filter: 'drop-shadow(0 24px 48px rgba(0,0,0,0.55))',
+                  zIndex: 2,
+                }}
+              >
+                <DailyMockup />
+              </motion.div>
+
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ repeat: Infinity, duration: 4.3, ease: 'easeInOut', delay: 0.7 }}
+                style={{
+                  position: 'absolute', right: 0, top: '10px',
+                  width: '205px',
+                  transform: 'rotate(3.5deg)',
+                  filter: 'drop-shadow(0 24px 48px rgba(0,0,0,0.55))',
+                  zIndex: 3,
+                }}
+              >
+                <StreakMockup />
+              </motion.div>
+
+              <motion.div
+                animate={{ y: [0, -12, 0] }}
+                transition={{ repeat: Infinity, duration: 4.0, ease: 'easeInOut', delay: 1.4 }}
+                style={{
+                  position: 'absolute', left: '70px', bottom: '20px',
+                  width: '200px',
+                  transform: 'rotate(-1.5deg)',
+                  filter: 'drop-shadow(0 24px 48px rgba(0,0,0,0.55))',
+                  zIndex: 4,
+                }}
+              >
+                <BankMockup />
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* ── Features ── */}
-      <section id="features" className="py-24 px-5">
-        <div className="mx-auto max-w-5xl">
+      {/* ── FEATURES BENTO ── */}
+      <section id="features" style={{ padding: '100px 24px', background: 'rgba(255,255,255,0.018)' }}>
+        <div style={{ maxWidth: '1152px', margin: '0 auto' }}>
           <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-80px' }}
-            variants={fadeUp}
-            className="text-center mb-16"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.5 }}
+            style={{ textAlign: 'center', marginBottom: '60px' }}
           >
-            <p className="text-xs font-bold uppercase tracking-widest text-primary mb-3">Everything included</p>
-            <h2 className="font-nunito font-black text-4xl text-foreground">One app. The whole system.</h2>
-            <p className="mt-4 text-muted-foreground max-w-xl mx-auto text-base">
-              From daily checklists to streak leaderboards to real payout tracking — GoGettr covers every part of the family chore cycle.
+            <div style={{
+              fontSize: '11px', fontWeight: 700, textTransform: 'uppercase',
+              letterSpacing: '0.12em', color: '#a5b4fc', marginBottom: '14px',
+            }}>
+              Everything included
+            </div>
+            <h2 style={{
+              fontFamily: 'Syne, sans-serif', fontWeight: 900,
+              fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.1,
+              letterSpacing: '-0.025em', marginBottom: '16px',
+            }}>
+              One app. The whole system.
+            </h2>
+            <p style={{ fontSize: '17px', color: 'rgba(255,255,255,0.42)', maxWidth: '480px', margin: '0 auto', lineHeight: 1.6 }}>
+              From daily checklists to streak leaderboards to real payout tracking.
             </p>
           </motion.div>
 
-          <div className="space-y-8">
-            {features.map((feature, i) => (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {bentoFeatures.map((card, i) => (
               <motion.div
-                key={feature.id}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: '-60px' }}
-                variants={{ ...fadeUp, visible: { ...fadeUp.visible, transition: { duration: 0.5, ease: 'easeOut', delay: 0.05 } } }}
-                className={`rounded-3xl bg-gradient-to-br ${feature.accent} border border-border/50 overflow-hidden`}
+                key={card.tag}
+                className={card.colSpan}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.5, delay: (i % 3) * 0.08 }}
+                whileHover={{ scale: 1.015, transition: { duration: 0.2 } }}
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: '20px', padding: '28px',
+                  overflow: 'hidden', position: 'relative',
+                }}
               >
-                <div className={`grid gap-8 p-8 ${i % 2 === 0 ? 'lg:grid-cols-[1fr_1.1fr]' : 'lg:grid-cols-[1.1fr_1fr] lg:[&>*:first-child]:order-2'}`}>
-                  {/* Text */}
-                  <div className="flex flex-col justify-center space-y-4">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${feature.dot}`} />
-                      <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{feature.tag}</span>
-                    </div>
-                    <h3 className="font-nunito font-black text-2xl text-foreground leading-tight">{feature.title}</h3>
-                    <p className="text-muted-foreground leading-relaxed text-sm">{feature.desc}</p>
-                  </div>
+                {/* Accent top stripe */}
+                <div style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
+                  background: `linear-gradient(90deg, ${card.accent}cc, transparent)`,
+                }} />
 
-                  {/* Mockup */}
-                  <div className="flex items-center justify-center lg:justify-end">
-                    <div className="w-full max-w-sm">
-                      {feature.mockup}
-                    </div>
-                  </div>
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center',
+                  padding: '3px 10px', borderRadius: '999px',
+                  background: `${card.accent}18`,
+                  border: `1px solid ${card.accent}38`,
+                  fontSize: '10px', fontWeight: 700,
+                  textTransform: 'uppercase', letterSpacing: '0.1em',
+                  color: card.accent, marginBottom: '10px',
+                }}>
+                  {card.tag}
+                </div>
+
+                <h3 style={{
+                  fontFamily: 'Syne, sans-serif', fontWeight: 800,
+                  fontSize: '17px', lineHeight: 1.25, color: 'white',
+                  marginBottom: '6px',
+                }}>
+                  {card.title}
+                </h3>
+                <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.38)', lineHeight: 1.55, marginBottom: '20px' }}>
+                  {card.desc}
+                </p>
+
+                <div style={{ transform: 'scale(0.9)', transformOrigin: 'top left', width: '111%' }}>
+                  {card.mockup}
                 </div>
               </motion.div>
             ))}
@@ -582,43 +660,154 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── HOW IT WORKS ── */}
+      <section style={{ padding: '100px 24px' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.5 }}
+            style={{ textAlign: 'center', marginBottom: '72px' }}
+          >
+            <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#a5b4fc', marginBottom: '14px' }}>
+              How it works
+            </div>
+            <h2 style={{
+              fontFamily: 'Syne, sans-serif', fontWeight: 900,
+              fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', lineHeight: 1.1, letterSpacing: '-0.025em',
+            }}>
+              Up and running in minutes
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {steps.map((step, i) => (
+              <motion.div
+                key={step.n}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: '20px', padding: '32px 28px',
+                  position: 'relative', overflow: 'hidden',
+                }}
+              >
+                <div style={{
+                  position: 'absolute', top: '-4px', right: '16px',
+                  fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: '88px', lineHeight: 1,
+                  color: 'rgba(99,102,241,0.1)', letterSpacing: '-0.04em',
+                  userSelect: 'none', pointerEvents: 'none',
+                }}>
+                  {step.n}
+                </div>
+                <div style={{
+                  width: '36px', height: '36px', borderRadius: '10px',
+                  background: 'rgba(99,102,241,0.14)',
+                  border: '1px solid rgba(99,102,241,0.28)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: '13px', color: '#818cf8',
+                  marginBottom: '20px',
+                }}>
+                  {step.n}
+                </div>
+                <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '19px', color: 'white', marginBottom: '10px', lineHeight: 1.2 }}>
+                  {step.title}
+                </h3>
+                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.42)', lineHeight: 1.65 }}>
+                  {step.desc}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── CTA ── */}
-      <section className="py-24 px-5">
+      <section style={{ padding: '0 24px 100px' }}>
         <motion.div
-          initial="hidden"
-          whileInView="visible"
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
-          variants={fadeUp}
-          className="mx-auto max-w-2xl text-center rounded-3xl bg-primary p-12 shadow-2xl shadow-primary/30"
+          transition={{ duration: 0.55 }}
+          style={{
+            maxWidth: '880px', margin: '0 auto',
+            borderRadius: '28px',
+            background: 'linear-gradient(135deg, #312e81 0%, #4338ca 45%, #6366f1 100%)',
+            padding: 'clamp(48px, 8vw, 80px) clamp(32px, 6vw, 64px)',
+            textAlign: 'center', position: 'relative', overflow: 'hidden',
+            boxShadow: '0 0 80px rgba(99,102,241,0.35), 0 40px 80px rgba(0,0,0,0.4)',
+          }}
         >
-          <h2 className="font-nunito font-black text-4xl text-primary-foreground mb-4">
+          {/* Decorative circles */}
+          <div style={{
+            position: 'absolute', top: '-70px', right: '-70px',
+            width: '260px', height: '260px', borderRadius: '50%',
+            background: 'rgba(255,255,255,0.07)', pointerEvents: 'none',
+          }} />
+          <div style={{
+            position: 'absolute', bottom: '-50px', left: '-50px',
+            width: '200px', height: '200px', borderRadius: '50%',
+            background: 'rgba(255,255,255,0.05)', pointerEvents: 'none',
+          }} />
+          <div style={{
+            fontSize: '11px', fontWeight: 700, textTransform: 'uppercase',
+            letterSpacing: '0.15em', color: 'rgba(255,255,255,0.55)', marginBottom: '18px',
+          }}>
+            Free forever
+          </div>
+          <h2 style={{
+            fontFamily: 'Syne, sans-serif', fontWeight: 900,
+            fontSize: 'clamp(2rem, 4.5vw, 3.2rem)', lineHeight: 1.1,
+            letterSpacing: '-0.025em', marginBottom: '18px',
+          }}>
             Your family is ready for this.
           </h2>
-          <p className="text-primary-foreground/80 text-base mb-8 leading-relaxed">
-            Set up your household in under 5 minutes. Add your kids, assign their first chores, and watch the streaks begin.
+          <p style={{
+            fontSize: '18px', color: 'rgba(255,255,255,0.68)', lineHeight: 1.65,
+            maxWidth: '480px', margin: '0 auto 40px',
+          }}>
+            Set up in 5 minutes. Kids, chores, streaks, allowance — all in one place.
           </p>
-          <Button
+          <button
             onClick={() => setLoginOpen(true)}
-            className="h-13 px-10 rounded-2xl text-base font-bold bg-white text-primary hover:bg-white/90"
-            style={{ height: '3.25rem' }}
+            style={{
+              padding: '16px 40px', borderRadius: '14px',
+              background: 'white', color: '#4338ca',
+              fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: '17px',
+              border: 'none', cursor: 'pointer',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+            }}
           >
-            Start Free Today
-          </Button>
+            Start Free Today →
+          </button>
         </motion.div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="border-t border-border/50 py-8 px-5">
-        <div className="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2 font-nunito font-black text-foreground">
-            <div className="w-6 h-6 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-black text-xs">G</div>
-            GoGettr
+      {/* ── FOOTER ── */}
+      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '32px 24px' }}>
+        <div style={{
+          maxWidth: '1152px', margin: '0 auto',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexWrap: 'wrap', gap: '12px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{
+              width: '26px', height: '26px', borderRadius: '8px',
+              background: 'linear-gradient(135deg, #6366f1, #818cf8)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'Nunito, sans-serif', fontWeight: 900, fontSize: '11px', color: 'white',
+            }}>G</div>
+            <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 900, fontSize: '15px' }}>GoGettr</span>
           </div>
-          <p>Built for families who mean business.</p>
+          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)' }}>Built for families who mean business.</p>
         </div>
       </footer>
 
-      {/* ── Login slide panel ── */}
+      {/* ── LOGIN PANEL ── */}
       <AnimatePresence>
         {loginOpen && <LoginPanel onClose={() => setLoginOpen(false)} />}
       </AnimatePresence>

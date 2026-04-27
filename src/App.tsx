@@ -35,7 +35,7 @@ const AuthenticatedApp = () => {
 
   if (authError) {
     if (authError.type === 'user_not_registered') return <UserNotRegisteredError />;
-    if (authError.type === 'auth_required') return <Navigate to="/login" replace />;
+    if (authError.type === 'auth_required') return <Navigate to="/" replace />;
   }
 
   // Authenticated but no profile yet — gate to setup flow only

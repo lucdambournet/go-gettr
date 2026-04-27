@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronLeft } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import PageFade from "@/components/layout/PageFade";
@@ -315,7 +315,15 @@ export default function AppLayout() {
   const { name: appName, icon: appIcon } = useAppManifest();
   const { signOut } = useAuth();
 
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   const sidebarWidth = sidebarCollapsed ? 56 : 256;
+  const mainMargin = isMobile ? 0 : sidebarWidth;
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -506,12 +514,12 @@ export default function AppLayout() {
         )}
       </AnimatePresence>
 
-      {/* Main content — shifts with sidebar */}
+      {/* Main content — shifts with sidebar on desktop only */}
       <motion.main
-        animate={{ marginLeft: sidebarWidth }}
+        animate={{ marginLeft: mainMargin }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="flex-1 pt-14 md:pt-0"
-        style={{ marginLeft: sidebarWidth }}
+        style={{ marginLeft: mainMargin }}
       >
         <div className="p-4 md:p-8">
           <PageFade key={location.pathname}>
